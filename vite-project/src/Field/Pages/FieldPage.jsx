@@ -1,18 +1,19 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 
-const Base = styled.div`
-  width: 1920px;
-  height: 1080px;
+const Container = styled.div`
+  width: 100%;
+  max-width: 1024px;
+  min-width: 360px;
+  margin: 0 auto;
   border: 1px, solid, black;
 `;
 
-const contener = styled.div``;
 function FieldPage() {
   return (
-    <Base>
-      <p>모바일/테블릿 화면</p>
-    </Base>
+    <Container>
+      <p>gi</p>
+    </Container>
   );
 }
 
