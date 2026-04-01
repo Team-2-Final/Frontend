@@ -7,7 +7,7 @@ const Base = styled.div`
   border: 1px, solid, black;
 `;
 
-const contener = styled.div``;
+const container = styled.div``;
 
 function AdminPage() {
   return (

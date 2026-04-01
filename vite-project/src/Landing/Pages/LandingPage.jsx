@@ -1,20 +1,41 @@
-import { useState } from 'react';
 import styled from 'styled-components';
 
-const Base = styled.div`
+import Header from '../Layout/Header';
+import Footer from '../Layout/Footer';
+
+import Hero from '../Components/Hero';
+import Problem from '../Components/Problem';
+import Solution from '../Components/Solution';
+import Features from '../Components/Features';
+import Dashboard from '../Components/Dashboard';
+import Impact from '../Components/Impact';
+import UseCase from '../Components/UseCase';
+import System from '../Components/System';
+import CTA from '../Components/CTA';
+
+const Container = styled.div`
   width: 1920px;
-  height: 1080px;
-  border: 1px, solid, black;
+  margin: 0 auto;
 `;
 
-const contener = styled.div``;
-
-function LandingPage() {
+const LandingPage = () => {
   return (
-    <Base>
-      <p>랜딩 페이지</p>
-    </Base>
+    <Container>
+      <Header />
+
+      <Hero />
+      <Problem />
+      <Solution />
+      <Features />
+      <Dashboard />
+      <Impact />
+      <UseCase />
+      <System />
+      <CTA />
+
+      <Footer />
+    </Container>
   );
-}
+};
 
 export default LandingPage;
