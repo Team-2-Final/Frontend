@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom'; // 👈 페이지 이동을 위한 훅 가져오기
+import { useNavigate } from 'react-router-dom';
 import {
   SidebarWrapper,
   LogoBox,
@@ -8,46 +8,46 @@ import {
 } from '../Pages/Styles/AdminShared';
 
 const Sidebar = ({ activeMenu }) => {
-  const navigate = useNavigate(); // 👈 navigate 함수 실행 준비
+  const navigate = useNavigate();
 
   return (
     <SidebarWrapper>
       <LogoBox>🌱 Seed Farm</LogoBox>
       <MenuNav>
-        {/* 클릭 시(onClick) 해당 경로로 이동하는 기능 추가 */}
         <MenuBox
           className={activeMenu === 'Dashboard' ? 'active' : ''}
-          onClick={() => navigate('/dashboard')}
+          onClick={() =>
+            navigate('/DashBoard')
+          } /* 파트너님 App.jsx 경로와 일치 */
         >
           Dashboard
         </MenuBox>
 
         <MenuBox
           className={activeMenu === 'CCTV' ? 'active' : ''}
-          onClick={() => navigate('/cctv')}
+          onClick={() => navigate('/cctv')} /* 파트너님 App.jsx 경로와 일치 */
         >
           CCTV & Sectors
         </MenuBox>
 
+        {/* 아래 두 페이지는 아직 App.jsx에 없지만 임시로 맞춰두었습니다 */}
         <MenuBox
           className={activeMenu === 'Device' ? 'active' : ''}
-          onClick={() => navigate('/device')}
+          onClick={() => navigate('/Device')}
         >
           Device Control
         </MenuBox>
 
         <MenuBox
           className={activeMenu === 'Analysis' ? 'active' : ''}
-          onClick={() => navigate('/analysis')}
+          onClick={() => navigate('/Analysis')}
         >
           Data Analysis
         </MenuBox>
 
-        {/* 하단 로그아웃 버튼을 밀어내기 위한 빈 공간 */}
         <div style={{ flex: 1 }}></div>
 
-        {/* 로그아웃은 보통 로그인 페이지로 보내거나 세션을 삭제하는 로직이 들어갑니다 */}
-        <MenuBox onClick={() => navigate('/login')}>Logout</MenuBox>
+        <MenuBox onClick={() => navigate('/Login')}>Logout</MenuBox>
       </MenuNav>
     </SidebarWrapper>
   );

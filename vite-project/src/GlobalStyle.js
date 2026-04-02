@@ -23,7 +23,7 @@ const GlobalStyle = createGlobalStyle`
     width: 100%;
     height: 100vh;
     background-color: var(--bg-color);
-    font-family: 'Pretendard', 'Spoqa Han Sans Neo', 'SUIT', sans-serif;
+    font-family: 'Pretendard', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     color: var(--primary-dark);

@@ -53,7 +53,6 @@ const Problem = () => {
       <Container ref={sectionRef}>
         {/* 💡 텍스트 영역은 제일 먼저 나타나게 delay="0s" 적용 */}
         <AnimatedBox className={animateClass} delay="0s">
-          <SectionLabel>PROBLEM SECTION</SectionLabel>
           <SectionTitle>기존 농업의 문제</SectionTitle>
           <SectionDesc>
             스마트한 분석과 자동화가 없으면 생산성과 안정성을 동시에 잡기

@@ -65,7 +65,6 @@ const CTA = () => {
           {/* 💡 텍스트 영역이 제일 먼저 나타납니다 (delay 0s) */}
           <AnimatedBox className={animateClass} delay="0s">
             <CTAText>
-              <SectionLabel light>CTA SECTION</SectionLabel>
               <SectionTitle>지금 바로 스마트팜을 자동화하세요</SectionTitle>
               <p>AI 기반 농장 관리로 수익은 높이고 비용은 줄이세요.</p>
             </CTAText>

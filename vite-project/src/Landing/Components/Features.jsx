@@ -55,7 +55,6 @@ const Features = () => {
       <Container>
         {/* 💡 타이틀 영역 애니메이션 적용 */}
         <AnimatedBox ref={sectionRef} className={sectionClass}>
-          <SectionLabel>FEATURES SECTION</SectionLabel>
           <SectionTitle>스마트팜 운영을 위한 핵심 기능</SectionTitle>
           <SectionDesc>
             Seed Farm은 작물 상태 분석부터 자동 제어, 모니터링까지 하나의

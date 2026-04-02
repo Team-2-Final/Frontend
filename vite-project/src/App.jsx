@@ -18,14 +18,9 @@ import CctvPage from './Admin/Pages/CctvPage';
 //   return isDesktop ? <AdminPage /> : <FieldPage />;
 // };
 
-const Base = styled.div`
-  margin: 0;
-  padding: 0;
-`;
-
 function App() {
   return (
-    <Base>
+    <>
       <GlobalStyle />
       <BrowserRouter>
         <Routes>
@@ -39,7 +34,7 @@ function App() {
           {/* <Route path="/dashboard" element={<DashboardRouter />} /> */}
         </Routes>
       </BrowserRouter>
-    </Base>
+    </>
   );
 }
 
