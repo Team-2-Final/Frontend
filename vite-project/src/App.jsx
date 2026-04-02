@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import AdminPage from './Admin/Pages/AdminPage';
 import FieldPage from './Field/Pages/FieldPage';
 import LandingPage from './Landing/Pages/LandingPage';
+import LoginPage from './Admin/Pages/LoginPage';
 
 const Base = styled.div`
   margin: 0;
@@ -16,6 +17,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/Login" element={<LoginPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/field" element={<FieldPage />} />
         </Routes>
