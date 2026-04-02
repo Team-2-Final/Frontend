@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import AdminPage from './Admin/Pages/AdminPage';
 import FieldPage from './Field/Pages/FieldPage';
 import LandingPage from './Landing/Pages/LandingPage';
+import GlobalStyle from './GlobalStyle';
 
 const Base = styled.div`
   margin: 0;
@@ -13,6 +14,7 @@ const Base = styled.div`
 function App() {
   return (
     <Base>
+      <GlobalStyle />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LandingPage />} />
