@@ -6,6 +6,8 @@ import FieldPage from './Field/Pages/FieldPage';
 import LandingPage from './Landing/Pages/LandingPage';
 import GlobalStyle from './GlobalStyle';
 import LoginPage from './Admin/Pages/LoginPage';
+import DashboardPage from './Admin/Pages/DashBoardPage';
+import CctvPage from './Admin/Pages/CctvPage';
 
 // 접속한 디바이스의 화면 크기를 기반으로 페이지 이동됨. 1024 이상 PC 이하 태블릿, 모바일 페이지로 이동
 // 페이지 다 만들고 주석 풀기.
@@ -30,7 +32,9 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/Login" element={<LoginPage />} />
           <Route path="/Admin" element={<AdminPage />} />
+          <Route path="/DashBoard" element={<DashboardPage />} />
           <Route path="/Field" element={<FieldPage />} />
+          <Route path="/cctv" element={<CctvPage />} />
           {/* 위에 동일. */}
           {/* <Route path="/dashboard" element={<DashboardRouter />} /> */}
         </Routes>
