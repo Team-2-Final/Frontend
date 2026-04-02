@@ -140,7 +140,6 @@ const Hero = () => {
           <HeroText>
             {/* 💡 요소들을 AnimatedBox로 감싸고 딜레이(delay)를 주어 순차적으로 등장하게 합니다 */}
             <AnimatedBox className={animateClass} delay="0s">
-              <SectionLabel>HERO SECTION</SectionLabel>
               <h1>AI가 농장을 관리합니다</h1>
             </AnimatedBox>
 

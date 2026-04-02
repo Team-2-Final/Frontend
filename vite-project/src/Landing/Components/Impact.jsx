@@ -45,7 +45,6 @@ const Impact = () => {
       <Container ref={sectionRef}>
         {/* 💡 텍스트 영역이 먼저 나타납니다 (delay 0s) */}
         <AnimatedBox className={animateClass} delay="0s">
-          <SectionLabel>IMPACT SECTION</SectionLabel>
           <SectionTitle>설치 농장의 성과</SectionTitle>
           <SectionDesc>
             스마트팜 AI 도입 후 기대할 수 있는 대표적인 운영 개선 지표입니다.

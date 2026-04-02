@@ -73,7 +73,6 @@ const Dashboard = () => {
       <Container ref={sectionRef}>
         {/* 💡 텍스트 영역이 먼저 나타납니다 (delay 0s) */}
         <AnimatedBox className={animateClass} delay="0s">
-          <SectionLabel light>DASHBOARD SECTION</SectionLabel>
           <SectionTitle>AI 대시보드 미리보기</SectionTitle>
           <SectionDesc light>
             작물 생육 상태, 환경 데이터, 알림 정보를 한 화면에서 관리합니다.

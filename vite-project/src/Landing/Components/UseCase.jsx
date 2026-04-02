@@ -60,7 +60,6 @@ const UseCase = () => {
       <Container ref={sectionRef}>
         {/* 💡 텍스트 영역이 제일 먼저 나타납니다 (delay 0s) */}
         <AnimatedBox className={animateClass} delay="0s">
-          <SectionLabel>USECASE SECTION</SectionLabel>
           <SectionTitle>이런 곳에 적용됩니다</SectionTitle>
           <SectionDesc>
             다양한 재배 환경에 맞춰 유연하게 적용할 수 있는 스마트팜

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { theme } from '../styles/landingStyled';
+import { theme } from '../Landing/styles/landingStyled';
 
 // 💡 버튼 스타일 정의 (위치, 디자인, 애니메이션)
 const ScrollButton = styled.button`

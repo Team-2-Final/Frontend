@@ -65,7 +65,6 @@ const System = () => {
       <Container ref={sectionRef}>
         {/* 💡 텍스트 영역이 제일 먼저 나타납니다 (delay 0s) */}
         <AnimatedBox className={animateClass} delay="0s">
-          <SectionLabel>SYSTEM SECTION</SectionLabel>
           <SectionTitle>스마트팜 시스템 구성</SectionTitle>
           <SectionDesc>
             현장의 데이터를 수집하고, AI가 분석한 결과를 대시보드와 제어

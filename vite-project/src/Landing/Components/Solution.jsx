@@ -71,7 +71,6 @@ const Solution = () => {
           <div>
             {/* 💡 우측 텍스트 타이틀 영역: 이미지 다음 등장 (delay 0.1s) */}
             <AnimatedBox className={animateClass} delay="0.1s">
-              <SectionLabel>SOLUTION SECTION</SectionLabel>
               <SectionTitle>AI 자동 관리 솔루션</SectionTitle>
               <SectionDesc>
                 카메라, 센서, AI 분석을 결합해 작물 상태를 빠르게 파악하고 더
