@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import {
   Container,
   Section,
-  SectionLabel,
+  SectionLabel, // 사용하지 않는다면 제거해도 무방합니다.
   SectionTitle,
   SectionDesc,
   CardGrid,
@@ -13,15 +13,26 @@ import { useScrollFadeIn } from '../../hooks/useScrollFadeIn'; // 💡 커스텀
 
 const UseCaseCard = styled(BaseCard)`
   overflow: hidden;
+
+  /* 💡 카드 크기 통일을 위한 CSS 추가 */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 `;
 
 const UseCaseImage = styled.div`
   height: 220px;
   background: linear-gradient(135deg, #cfe7d2, #9bcfa3);
+  flex-shrink: 0; /* 💡 이미지가 찌그러지지 않도록 고정 */
 `;
 
 const UseCaseBody = styled.div`
   padding: 24px;
+
+  /* 💡 남은 공간을 채우도록 설정 */
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 
   h3 {
     font-size: 22px;
@@ -32,6 +43,8 @@ const UseCaseBody = styled.div`
     font-size: 16px;
     line-height: 1.7;
     color: #475569;
+    margin: 0;
+    flex-grow: 1; /* 💡 텍스트가 짧아도 공간을 꽉 채우게 만듦 */
   }
 `;
 
@@ -74,6 +87,9 @@ const UseCase = () => {
               key={item.title}
               className={animateClass}
               delay={`${0.1 + index * 0.1}s`}
+              style={{
+                height: '100%',
+              }} /* 💡 애니메이션 래퍼도 그리드 셀의 높이를 가득 채우도록 설정 */
             >
               <UseCaseCard>
                 <UseCaseImage />

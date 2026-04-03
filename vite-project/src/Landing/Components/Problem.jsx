@@ -2,7 +2,6 @@ import styled from 'styled-components';
 import {
   Container,
   Section,
-  SectionLabel,
   SectionTitle,
   SectionDesc,
   CardGrid,
@@ -15,6 +14,12 @@ import { useScrollFadeIn } from '../../hooks/useScrollFadeIn'; // 💡 커스텀
 const InfoCard = styled(BaseCard)`
   padding: 28px;
 
+  /* 💡 카드 크기 통일을 위한 CSS 추가 */
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+
   h3 {
     font-size: 22px;
     margin-bottom: 10px;
@@ -24,6 +29,8 @@ const InfoCard = styled(BaseCard)`
     font-size: 16px;
     line-height: 1.7;
     color: #475569;
+    margin: 0; /* 기본 마진 제거 */
+    flex-grow: 1; /* 💡 텍스트가 짧아도 공간을 채우도록 설정 */
   }
 `;
 
@@ -67,6 +74,9 @@ const Problem = () => {
               key={item.title}
               className={animateClass}
               delay={`${0.1 + index * 0.1}s`}
+              style={{
+                height: '100%',
+              }} /* 💡 애니메이션 래퍼도 그리드 셀의 높이를 가득 채우도록 설정 */
             >
               <InfoCard>
                 <IconCircle>!</IconCircle>
