@@ -430,7 +430,6 @@ const VisionCard = styled.div`
     line-height: 1.55;
     position: relative;
     z-index: 1;
-    max-width: 60%; /* 우측에 겹치는 폰트와 간섭되지 않도록 텍스트 너비 제한 */
     word-break: keep-all;
   }
 
@@ -662,7 +661,7 @@ const Hero = () => {
                     </p>
                   </VisionCard>
 
-                  <PhoneWrap>
+                  {/* <PhoneWrap>
                     <MobileCard>
                       <MobileTop />
                       <MobileScreen>
@@ -672,7 +671,7 @@ const Hero = () => {
                         <MobileMiniCard />
                       </MobileScreen>
                     </MobileCard>
-                  </PhoneWrap>
+                  </PhoneWrap> */}
                 </MainGrid>
               </DashboardShell>
             </LargeMock>
