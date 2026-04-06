@@ -1,84 +1,108 @@
 import styled from 'styled-components';
-import {
-  Container,
-  Section,
-  SectionLabel,
-  SectionTitle,
-  PrimaryButton,
-  AnimatedBox, // 💡 애니메이션 래퍼 추가
-} from '../styles/landingStyled';
-import { useScrollFadeIn } from '../../hooks/useScrollFadeIn'; // 💡 커스텀 훅 추가
+import { Container } from '../styles/landingStyled';
 
-const CTAWrap = styled(Section)`
-  padding: 0;
-  background: linear-gradient(135deg, #2e7d32, #66bb6a);
+const CTASection = styled.section`
+  background: linear-gradient(135deg, #2e7d32, #43a047);
+  padding: 80px 0;
+  color: white;
 `;
 
-const CTAInner = styled.div`
-  min-height: 300px;
+const CTABox = styled.div`
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 32px;
+  align-items: center;
+  gap: 40px;
 
   @media (max-width: 1024px) {
-    min-height: 260px;
     flex-direction: column;
-    justify-content: center;
     text-align: center;
   }
 `;
 
-const CTAText = styled.div`
+const TextWrap = styled.div`
+  max-width: 600px;
+
   h2 {
-    color: white;
-    margin-bottom: 12px;
+    font-size: 42px;
+    margin-bottom: 16px;
+    line-height: 1.3;
   }
 
   p {
-    font-size: 20px;
-    color: rgba(255, 255, 255, 0.9);
-  }
-
-  @media (max-width: 640px) {
-    p {
-      font-size: 16px;
-    }
+    font-size: 18px;
+    opacity: 0.9;
+    margin-bottom: 20px;
+    line-height: 1.6;
   }
 `;
 
-const CTAButton = styled(PrimaryButton)`
+const BenefitList = styled.div`
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+
+  span {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 14px;
+  }
+`;
+
+const ButtonWrap = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+const PrimaryBtn = styled.button`
   background: white;
   color: #2e7d32;
-  min-width: 220px;
+  font-weight: 800;
+  padding: 16px 28px;
+  border-radius: 999px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+`;
+
+const SecondaryBtn = styled.button`
+  background: transparent;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 14px 24px;
+  border-radius: 999px;
+  font-size: 14px;
+  cursor: pointer;
 `;
 
 const CTA = () => {
-  // 💡 스크롤 감지 훅 호출
-  const { ref: sectionRef, className: animateClass } = useScrollFadeIn();
-
   return (
-    <CTAWrap id="contact">
+    <CTASection>
       <Container>
-        {/* 💡 CTAInner에 ref를 달아 스크롤 트리거 영역으로 설정 */}
-        <CTAInner ref={sectionRef}>
-          {/* 💡 텍스트 영역이 제일 먼저 나타납니다 (delay 0s) */}
-          <AnimatedBox className={animateClass} delay="0s">
-            <CTAText>
-              <SectionTitle>지금 바로 스마트팜을 자동화하세요</SectionTitle>
-              <p>AI 기반 농장 관리로 수익은 높이고 비용은 줄이세요.</p>
-            </CTAText>
-          </AnimatedBox>
+        <CTABox>
+          <TextWrap>
+            <h2>지금 바로 스마트팜을 자동화하세요</h2>
+            <p>
+              AI가 작물을 대신 관찰하고, 최적의 환경을 자동으로 유지합니다. 지금
+              시작하면 초기 세팅까지 무료로 지원합니다.
+            </p>
 
-          {/* 💡 클릭을 유도하는 버튼이 살짝 늦게 등장합니다 (delay 0.2s) */}
-          <AnimatedBox className={animateClass} delay="0.2s">
-            <div>
-              <CTAButton>무료 상담 신청</CTAButton>
-            </div>
-          </AnimatedBox>
-        </CTAInner>
+            <BenefitList>
+              <span>✔ 초기 설정 무료</span>
+              <span>✔ 24시간 AI 관리</span>
+              <span>✔ 자동 환경 제어</span>
+            </BenefitList>
+          </TextWrap>
+
+          <ButtonWrap>
+            <PrimaryBtn>무료 상담 시작하기</PrimaryBtn>
+            <SecondaryBtn>데모 먼저 보기</SecondaryBtn>
+          </ButtonWrap>
+        </CTABox>
       </Container>
-    </CTAWrap>
+    </CTASection>
   );
 };
 

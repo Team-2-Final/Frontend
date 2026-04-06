@@ -25,13 +25,12 @@ const LandingPage = () => {
       <Solution />
       <Features />
       <Dashboard />
-      <Impact />
       <UseCase />
+      <Impact />
       <System />
       <CTA />
 
       <Footer />
-
       <ScrollToTop />
     </PageWrapper>
   );

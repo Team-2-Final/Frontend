@@ -20,8 +20,24 @@ export const theme = {
 export const PageWrapper = styled.div`
   width: 100%;
   overflow-x: hidden;
-  background: ${theme.colors.light};
   color: ${theme.colors.text};
+  background:
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(102, 187, 106, 0.05) 0,
+      transparent 180px
+    ),
+    radial-gradient(
+      circle at 80% 10%,
+      rgba(0, 194, 168, 0.04) 0,
+      transparent 220px
+    ),
+    radial-gradient(
+      circle at 50% 80%,
+      rgba(46, 125, 50, 0.035) 0,
+      transparent 240px
+    ),
+    ${theme.colors.light};
 `;
 
 export const Container = styled.div`
