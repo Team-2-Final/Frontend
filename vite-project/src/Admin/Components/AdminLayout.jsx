@@ -22,7 +22,6 @@ const AdminLayout = () => {
     'Sector 03 (파프리카)',
     'All Sectors (전체)',
   ];
-
   const alerts = [
     {
       id: 1,
