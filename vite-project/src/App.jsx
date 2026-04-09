@@ -26,11 +26,13 @@ function App() {
           <Route path="/Login" element={<LoginPage />} />
           <Route path="/Admin" element={<AdminPage />} />
 
-          {/* 태블릿, 모바일 전용 */}
+          {/* 태블릿, 모바일 전용~ */}
           <Route path="/field" element={<TMHomePage />} />
           <Route path="/field/Camera" element={<CameraPage />} />
           <Route path="/field/Control" element={<ControlPage />} />
           <Route path="/field/Alerts" element={<AlertsPage />} />
+
+          {/* git push  */}
 
           {/* 🚨 AdminLayout으로 껍데기 씌우기 */}
           <Route element={<AdminLayout />}>
