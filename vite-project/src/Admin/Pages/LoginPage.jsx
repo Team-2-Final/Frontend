@@ -1,26 +1,89 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import { PageContainer } from './Styles/AdminShared'; // 우리가 만든 67% 스케일링 껍데기
+import { PageContainer } from './Styles/AdminShared';
 
 const LoginPage = () => {
+  // 로그인 폼 상태 관리
+  const [loginInputs, setLoginInputs] = useState({ id: '', password: '' });
+  const [rememberMe, setRememberMe] = useState(false);
+
+  // 입력값 변경 핸들러
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setLoginInputs((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // 폼 제출 핸들러
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('Login Attempt:', loginInputs, 'Remember ID:', rememberMe);
+    // API 호출 로직 추가 위치
+  };
+
   return (
-    // 🚨 PageContainer를 쓰되, 가운데 정렬을 덮어씌운 LoginWrapper를 사용합니다.
     <LoginWrapper>
       <LoginBox>
-        <div className="logo">🌱 Seed Farm</div>
-        <h2 className="title">Admin Login</h2>
+        <div className="logo-area">
+          <div className="icon-wrapper">
+            <span className="icon">🌱</span>
+          </div>
+          <h1 className="brand">Seed Farm</h1>
+          <p className="subtitle">AI Smart Farm Control Center</p>
+        </div>
 
-        <InputGroup>
-          <label>ID</label>
-          <input type="text" placeholder="아이디를 입력하세요" />
-        </InputGroup>
+        <FormArea onSubmit={handleSubmit}>
+          <InputGroup>
+            <label>ADMIN ID</label>
+            <div className="input-wrap">
+              <span className="input-icon">👤</span>
+              <input
+                type="text"
+                name="id"
+                value={loginInputs.id}
+                onChange={handleInputChange}
+                placeholder="아이디를 입력하세요"
+                required
+              />
+            </div>
+          </InputGroup>
 
-        <InputGroup>
-          <label>Password</label>
-          <input type="password" placeholder="비밀번호를 입력하세요" />
-        </InputGroup>
+          <InputGroup>
+            <label>PASSWORD</label>
+            <div className="input-wrap">
+              <span className="input-icon">🔒</span>
+              <input
+                type="password"
+                name="password"
+                value={loginInputs.password}
+                onChange={handleInputChange}
+                placeholder="비밀번호를 입력하세요"
+                required
+              />
+            </div>
+          </InputGroup>
 
-        <LoginButton>로그인</LoginButton>
+          <div className="options">
+            <label className="remember">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+              <span className="checkmark"></span>
+              <span>아이디 저장</span>
+            </label>
+          </div>
+
+          <LoginButton type="submit">
+            Access Control Panel
+            <span className="arrow">→</span>
+          </LoginButton>
+        </FormArea>
+
+        <SystemStatus>
+          <span className="status-dot"></span>
+          All systems online and operational
+        </SystemStatus>
       </LoginBox>
     </LoginWrapper>
   );
@@ -28,85 +91,234 @@ const LoginPage = () => {
 
 export default LoginPage;
 
-// --- Styled Components ---
+// --- 스타일 컴포넌트 ---
 
-// 💡 핵심: 기존 PageContainer의 속성을 그대로 물려받으면서 가운데 정렬만 추가!
 const LoginWrapper = styled(PageContainer)`
-  justify-content: center; /* 가로 중앙 정렬 */
-  align-items: center; /* 세로 중앙 정렬 */
+  justify-content: center;
+  align-items: center;
+  background: #f1f5f9;
+  background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+  background-size: 24px 24px;
 `;
 
 const LoginBox = styled.div`
-  background: var(--white);
-  padding: 3em 2.5em; /* 🚨 rem 대신 em을 써서 1280 화면에선 같이 줄어들게! */
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-  width: 400px;
-  max-width: 90%; /* 화면이 너무 좁아질 때 방어 */
+  background: #ffffff;
+  padding: 3em;
+  border-radius: 24px;
+  box-shadow:
+    0 20px 40px -10px rgba(15, 23, 42, 0.1),
+    0 0 0 1px rgba(226, 232, 240, 0.8);
+  width: 440px;
+  max-width: 90%;
   display: flex;
   flex-direction: column;
+  position: relative;
+  overflow: hidden;
 
-  /* 1280 모니터(67% 축소)에 대응하는 반응형 크기 조절 */
   @media (max-width: 1280px) {
-    width: 266px; /* 400px의 67% */
+    width: 294px;
   }
 
-  .logo {
-    text-align: center;
-    font-size: 1.8em;
-    font-weight: 800;
-    color: var(--point-green);
-    margin-bottom: 0.5em;
+  .logo-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2.5em;
+    .icon-wrapper {
+      width: 4em;
+      height: 4em;
+      background: #f0fdf4;
+      border-radius: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 1em;
+      border: 1px solid #bbf7d0;
+      box-shadow: 0 4px 10px rgba(16, 185, 129, 0.1);
+      .icon {
+        font-size: 2em;
+      }
+    }
+    .brand {
+      font-size: 1.8em;
+      font-weight: 900;
+      color: #0f172a;
+      margin: 0 0 0.2em 0;
+      letter-spacing: -0.03em;
+    }
+    .subtitle {
+      font-size: 0.9em;
+      font-weight: 700;
+      color: #64748b;
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
   }
+`;
 
-  .title {
-    text-align: center;
-    font-size: 1.2em;
-    color: var(--primary-dark);
-    margin-bottom: 2em;
+const FormArea = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 1.2em;
+
+  .options {
+    display: flex;
+    align-items: center;
+    margin-top: -0.5em;
+    margin-bottom: 1em;
+    .remember {
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      cursor: pointer;
+      font-size: 0.85em;
+      font-weight: 700;
+      color: #64748b;
+      input {
+        display: none;
+      }
+      .checkmark {
+        width: 16px;
+        height: 16px;
+        background: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        position: relative;
+        transition: 0.2s;
+      }
+      input:checked + .checkmark {
+        background: #10b981;
+        border-color: #10b981;
+      }
+      input:checked + .checkmark::after {
+        content: '✔';
+        position: absolute;
+        color: white;
+        font-size: 10px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
   }
 `;
 
 const InputGroup = styled.div`
   display: flex;
   flex-direction: column;
-  margin-bottom: 1.2em;
+  gap: 0.5em;
 
   label {
-    font-size: 0.9em;
-    font-weight: 600;
-    color: var(--primary-dark);
-    margin-bottom: 0.4em;
+    font-size: 0.75em;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
-  input {
-    padding: 0.8em 1em;
-    border: 1px solid #dde7df;
-    border-radius: 10px;
-    font-size: 1em;
-    outline: none;
-    transition: border-color 0.2s;
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    .input-icon {
+      position: absolute;
+      left: 1em;
+      font-size: 1.1em;
+      color: #64748b;
+      filter: grayscale(100%);
+      z-index: 1;
+    }
 
-    &:focus {
-      border-color: var(--point-green);
+    input {
+      width: 100%;
+      padding: 1em 1em 1em 3em;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 0.95em;
+      font-weight: 700;
+      color: #0f172a;
+      transition: all 0.2s;
+
+      &::placeholder {
+        color: #94a3b8;
+        font-weight: 600;
+      }
+      &:focus {
+        background: #ffffff;
+        border-color: #10b981;
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+      }
     }
   }
 `;
 
 const LoginButton = styled.button`
-  margin-top: 1em;
-  padding: 1em;
-  background-color: var(--point-green);
-  color: var(--white);
-  font-size: 1.1em;
-  font-weight: 700;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
   border: none;
-  border-radius: 10px;
+  padding: 1.2em;
+  border-radius: 12px;
+  font-size: 1em;
+  font-weight: 800;
+  letter-spacing: 0.02em;
   cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   transition: all 0.2s;
 
+  .arrow {
+    font-size: 1.2em;
+    transition: transform 0.2s;
+  }
+
   &:hover {
-    background-color: #236026;
     transform: translateY(-2px);
+    box-shadow: 0 8px 20px -5px rgba(16, 185, 129, 0.4);
+    .arrow {
+      transform: translateX(4px);
+    }
+  }
+  &:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+`;
+
+const SystemStatus = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5em;
+  margin-top: 2.5em;
+  font-size: 0.75em;
+  font-weight: 700;
+  color: #94a3b8;
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+    70% {
+      transform: scale(1);
+      box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+    }
+    100% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
   }
 `;
