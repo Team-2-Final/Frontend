@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { useOutletContext } from 'react-router-dom';
-import { BaseCard, CardTitle } from './Styles/AdminShared';
+import { BaseCard, CardTitle, Flex } from './Styles/AdminShared';
 
 const DeviceControlPage = () => {
   const { selectedBranch } = useOutletContext();
@@ -163,7 +163,8 @@ const DeviceControlPage = () => {
       </SubMenuWrapper>
 
       <LayoutGrid>
-        <LeftColumn>
+        {/* 🚨 LeftColumn 대신 Flex 사용 */}
+        <Flex dir="column" gap="1.5em" style={{ minWidth: 0 }}>
           <ControlGroupCard>
             <div
               className="header-flex"
@@ -244,9 +245,9 @@ const DeviceControlPage = () => {
               ))}
             </HistoryList>
           </HistoryCard>
-        </LeftColumn>
+        </Flex>
 
-        <RightColumn>
+        <Flex dir="column" style={{ minWidth: 0 }}>
           <DetailCard>
             <CardTitle>세부 목표 수치 개입</CardTitle>
             {!selectedDevice ? (
@@ -360,7 +361,7 @@ const DeviceControlPage = () => {
               </PremiumControlArea>
             )}
           </DetailCard>
-        </RightColumn>
+        </Flex>
       </LayoutGrid>
     </>
   );
@@ -410,19 +411,7 @@ const SubMenuBtn = styled.button`
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
   }
 `;
-const LeftColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.5em;
-  flex: 1;
-  min-width: 0;
-`;
-const RightColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 0;
-`;
+
 const ControlGroupCard = styled(BaseCard)`
   flex: 2;
   padding: 1.5em;

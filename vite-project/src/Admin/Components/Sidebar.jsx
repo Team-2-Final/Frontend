@@ -136,7 +136,7 @@ const Sidebar = ({ activeMenu, isOpen, closeSidebar }) => {
           <div className="logo-icon">
             <Icons.Leaf />
           </div>
-          <span className="logo-text">씨팜 (Seed-Farm)</span>
+          <span className="logo-text">Seed-Farm</span>
         </div>
         <CloseBtn onClick={closeSidebar}>
           <Icons.Close />

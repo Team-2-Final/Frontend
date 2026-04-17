@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { BaseCard, CardTitle } from './Styles/AdminShared';
+import { BaseCard, CardTitle, Flex } from './Styles/AdminShared';
 
 const CctvPage = () => {
   // 🚨 K-농장/기업에서 쓰는 직관적인 구역 명칭으로 변경
@@ -67,10 +67,13 @@ const CctvPage = () => {
 
   return (
     <ContentGrid>
-      <LeftColumn>
-        <NavCard>
+      {/* LeftColumn 대신 Flex 사용 */}
+      <Flex dir="column" flex="1" style={{ minWidth: 0 }}>
+        {/* NavCard 대신 BaseCard에 프롭스(flex="1") 적용 */}
+        <BaseCard flex="1">
           <CardTitle>현장 카메라 목록</CardTitle>
           <NavContainer>
+            {/* ... 기존 NavContainer 내부 로직 동일 ... */}
             {sectors.map((sector) => {
               const isActiveSector = activeSector === sector.id;
               const sectorCams = cameras.filter(
@@ -106,11 +109,13 @@ const CctvPage = () => {
               );
             })}
           </NavContainer>
-        </NavCard>
-      </LeftColumn>
+        </BaseCard>
+      </Flex>
 
-      <MainCameraColumn>
+      {/* MainCameraColumn 대신 Flex 사용 */}
+      <Flex dir="column" flex="1" style={{ minWidth: 0 }}>
         <CameraCard>
+          {/* ... 기존 CameraCard 내부 로직 동일 ... */}
           <div className="camera-header">
             <div className="title-area">
               <CardTitle style={{ marginBottom: 0 }}>
@@ -158,7 +163,7 @@ const CctvPage = () => {
             </button>
           </CameraControls>
         </CameraCard>
-      </MainCameraColumn>
+      </Flex>
     </ContentGrid>
   );
 };
@@ -179,19 +184,7 @@ const ContentGrid = styled.div`
     flex-direction: column;
   }
 `;
-const LeftColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  min-width: 0;
-`;
-const NavCard = styled(BaseCard)`
-  flex: 1;
-  padding: 1.5em;
-  display: flex;
-  flex-direction: column;
-`;
+
 const NavContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -294,13 +287,6 @@ const NavContainer = styled.div`
   }
 `;
 
-const MainCameraColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  min-width: 0;
-`;
 const CameraCard = styled(BaseCard)`
   flex: 1;
   padding: 0;

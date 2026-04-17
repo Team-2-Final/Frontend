@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { useOutletContext } from 'react-router-dom';
-import { CardTitle } from './Styles/AdminShared';
+import { CardTitle, BaseCard, Flex } from './Styles/AdminShared';
 
 const DashboardPage = () => {
   const { selectedBranch } = useOutletContext();
 
   const dashboardData = useMemo(
     () => ({
-      '천안 본점 (Cheonan Hub)': {
+      '천안 본점 (종합관제센터)': {
         score: 96,
         phase: '개화기 🌸',
         status: '작물 활력도 최상 (전주 대비 2% 상승)',
@@ -56,6 +56,7 @@ const DashboardPage = () => {
             status: 'stable',
           },
         ],
+        // 🚨 누락됐던 생장 데이터 복구
         growth: {
           height: '124.5 cm',
           leafCount: '18 개',
@@ -66,36 +67,38 @@ const DashboardPage = () => {
           {
             id: 1,
             time: '14:10',
-            sector: '1구역',
-            zone: 'A블록',
-            device: '💧 관수 펌프',
-            action: '가동 중',
-            desc: '급수 2.5L / 양액 EC 1.2 공급 완료',
+            device: '💧 메인 펌프',
+            action: '가동',
+            desc: 'EC 1.2 공급',
             status: 'active',
           },
           {
             id: 2,
             time: '13:30',
-            sector: '2구역',
-            zone: 'C블록',
             device: '💨 배기팬 2번',
-            action: '2단계 가동',
-            desc: '설정 온도(24°C) 초과로 인한 강제 배기',
+            action: '2단계',
+            desc: '온도 초과 배기',
             status: 'active',
           },
           {
             id: 3,
             time: '11:00',
-            sector: '전 구역',
-            zone: '상단',
             device: '🌤️ 차광 스크린',
             action: '50% 전개',
-            desc: '외부 일사량 과다 감지 및 차단 조치',
+            desc: '일사량 차단',
+            status: 'done',
+          },
+          {
+            id: 4,
+            time: '10:00',
+            device: '💡 LED 보광등',
+            action: '소등',
+            desc: '주간 모드 전환',
             status: 'done',
           },
         ],
       },
-      '천안 제2센터 (Cheonan B2)': {
+      '천안 제2센터 (육묘 전용)': {
         score: 88,
         phase: '정식기 🌱',
         status: '초기 활착 안정적 진행 중',
@@ -143,6 +146,7 @@ const DashboardPage = () => {
             status: 'stable',
           },
         ],
+        // 🚨 누락됐던 생장 데이터 복구
         growth: {
           height: '45.0 cm',
           leafCount: '8 개',
@@ -153,8 +157,6 @@ const DashboardPage = () => {
           {
             id: 1,
             time: '14:15',
-            sector: '1구역',
-            zone: 'B블록',
             device: '🌡️ 온풍기',
             action: '대기 모드',
             desc: '야간 설정 온도 18°C 대기 중',
@@ -163,8 +165,6 @@ const DashboardPage = () => {
           {
             id: 2,
             time: '12:00',
-            sector: '3구역',
-            zone: '육묘실',
             device: '💡 LED 보광등',
             action: '점등 가동',
             desc: '일조량 부족 감지 -> 광량 보충 실행',
@@ -177,77 +177,85 @@ const DashboardPage = () => {
   );
 
   const currentData =
-    dashboardData[selectedBranch] || dashboardData['천안 본점 (Cheonan Hub)'];
-  const [liveSensors, setLiveSensors] = useState(currentData.sensors);
+    dashboardData[selectedBranch] || dashboardData['천안 본점 (종합관제센터)'];
+  const [liveSensors, setLiveSensors] = useState(currentData?.sensors || []);
 
-  useEffect(() => {
-    setLiveSensors(currentData.sensors);
-    const interval = setInterval(() => {
-      setLiveSensors((prev) =>
-        prev.map((s) => {
-          if (s.label === '내부 온도' || s.label === '내부 습도') {
-            const fluctuate = Math.random() * 0.2 - 0.1;
-            return {
-              ...s,
-              value: (parseFloat(s.value) + fluctuate).toFixed(1),
-            };
-          }
-          return s;
-        }),
-      );
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [selectedBranch, currentData]);
+  // 🚨 API 대체용 외부 기상 데이터 (UI 표시 전용, AI 로직 관여 X)
+  const weatherData = {
+    temp: 15.2,
+    desc: '맑음',
+    humidity: 42,
+    aqi: '보통',
+    icon: '🌤️',
+  };
+
+  // 🚨 도메인 지식 어필용 수조/정화 시스템 데이터
+  const waterSystemData = {
+    tankLevel: 78,
+    purifying: true,
+    filterStatus: '정상',
+    inputRate: '2.5 L/min',
+  };
 
   const aiLogs = [
     {
       time: '14:25',
       status: 'action',
       title: '관수량 10% 증량 권장',
-      desc: '오후 일사량 급증 예상 (AI 예측 신뢰도: 95%)',
+      desc: '오후 외부 일사량 급증 예상 대비',
     },
     {
       time: '13:55',
       status: 'warning',
       title: '고온 피해 주의보',
-      desc: '1시간 내 내부 온도 28°C 돌파 예상 - 환기 필요',
+      desc: '내부 온도 28°C 돌파 예상 - 사전 환기 필요',
     },
   ];
 
   return (
     <ContentGrid>
-      <LeftColumn>
-        <FarmSummaryCard>
-          <div className="header-row">
-            <div>
-              <CardTitle className="white-text">종합 관제 현황</CardTitle>
-              <div className="branch-name">{selectedBranch}</div>
+      {/* 🚨 1. LeftColumn ➔ Flex로 교체 완료 */}
+      <Flex dir="column" gap="1.5em" flex="1" style={{ minWidth: 0 }}>
+        <TopSummaryCard>
+          <div className="summary-widget weather-widget">
+            <div className="widget-header">
+              <span className="w-title">외부 기상 관측</span>
+              <span className="w-sub">참고 지표</span>
             </div>
-            <span className="optimal-badge">
-              생육 단계: {currentData.phase}
-            </span>
-          </div>
-          <div className="summary-body">
-            <div className="main-info">
-              <div className="score-area">
-                <span className="score">{currentData.score}</span>
-                <span className="label">점</span>
+            <div className="widget-body">
+              <div className="icon-wrapper">{weatherData.icon}</div>
+              <div className="info-wrapper">
+                <div className="temp-text">
+                  {weatherData.temp}
+                  <span>°C</span>
+                </div>
+                <div className="desc-text">
+                  {weatherData.desc} • 습도 {weatherData.humidity}%
+                </div>
               </div>
-              <p className="status-text">{currentData.status}</p>
             </div>
-            <div className="metrics-row">
-              <div className="metric-box">
-                <span className="m-label">미조치 알림</span>
-                <span className="m-value warning">⚠️ 1건 확인 필요</span>
-              </div>
-              <div className="divider"></div>
-              <div className="metric-box">
-                <span className="m-label">예정된 자동 제어</span>
-                <span className="m-value normal">전 구역 방제 (14:00)</span>
-              </div>
+            <div className="widget-footer">
+              <span className="aqi-badge">대기질: {weatherData.aqi}</span>
+              <span className="aqi-desc">공조/환기 연동 대기</span>
             </div>
           </div>
-        </FarmSummaryCard>
+
+          <div className="summary-widget score-widget">
+            <div className="widget-header">
+              <span className="w-title">종합 생육 점수</span>
+            </div>
+            <div className="widget-body score-body">
+              <div className="score-value">
+                {currentData.score}
+                <span>점</span>
+              </div>
+              <div className="score-details">
+                <span className="phase-badge">{currentData.phase}</span>
+                <span className="status-text">{currentData.status}</span>
+              </div>
+            </div>
+          </div>
+        </TopSummaryCard>
 
         <SensorsGroupCard>
           <CardTitle>환경 측정 데이터</CardTitle>
@@ -271,45 +279,85 @@ const DashboardPage = () => {
             ))}
           </SensorGrid>
         </SensorsGroupCard>
-      </LeftColumn>
+      </Flex>
 
-      <MiddleColumn>
+      {/* 🚨 2. MiddleColumn ➔ Flex로 교체 완료 */}
+      <Flex dir="column" gap="1.5em" flex="1" style={{ minWidth: 0 }}>
+        <WaterSystemCard>
+          <div className="header-row">
+            <CardTitle>수자원 및 여과 시스템</CardTitle>
+            <span
+              className={`status-badge ${waterSystemData.purifying ? 'active' : ''}`}
+            >
+              {waterSystemData.purifying ? '🟢 정화 가동 중' : '⚪ 대기 중'}
+            </span>
+          </div>
+
+          <div className="system-body">
+            <div className="tank-visual">
+              <div className="tank-bg">
+                <div
+                  className="tank-fill"
+                  style={{ height: `${waterSystemData.tankLevel}%` }}
+                >
+                  <div className="wave"></div>
+                </div>
+              </div>
+              <span className="tank-label">메인 수조</span>
+            </div>
+
+            <div className="system-info">
+              <div className="info-row">
+                <span className="i-label">수조 잔량</span>
+                <span className="i-value highlight">
+                  {waterSystemData.tankLevel}%
+                </span>
+              </div>
+              <div className="info-row">
+                <span className="i-label">원수 유입량</span>
+                <span className="i-value">{waterSystemData.inputRate}</span>
+              </div>
+              <div className="info-row">
+                <span className="i-label">여과기 상태</span>
+                <span className="i-value normal">
+                  {waterSystemData.filterStatus} (교체 불필요)
+                </span>
+              </div>
+              <p className="system-desc">
+                * 유입된 원수는 물리/화학적 여과 시스템을 거쳐 메인 수조에
+                안전하게 보관됩니다.
+              </p>
+            </div>
+          </div>
+        </WaterSystemCard>
+
         <LogGroupCard>
           <div className="log-header">
             <CardTitle>장치 작동 이력</CardTitle>
-            <span className="sub-badge system">시스템 자동</span>
           </div>
           <LogList>
             {currentData.logs.map((log) => (
               <DeviceLogItem key={log.id} className={log.status}>
-                <div className="log-top">
-                  <div className="badges">
-                    <span className="sector-badge">{log.sector}</span>
-                    <span className="zone-badge">{log.zone}</span>
-                  </div>
-                  <span className="time">{log.time}</span>
-                </div>
-                <div className="log-mid">
+                <span className="time">{log.time}</span>
+                <div className="log-main">
                   <span className="device">{log.device}</span>
-                  <span className={`action ${log.status}`}>{log.action}</span>
-                </div>
-                <div className="log-bot">
                   <span className="desc">{log.desc}</span>
                 </div>
+                <span className={`action ${log.status}`}>{log.action}</span>
               </DeviceLogItem>
             ))}
           </LogList>
         </LogGroupCard>
-      </MiddleColumn>
+      </Flex>
 
-      <RightColumn>
+      {/* 🚨 3. RightColumn ➔ Flex로 교체 완료 */}
+      <Flex dir="column" gap="1.5em" flex="1" style={{ minWidth: 0 }}>
         <CameraCard>
           <div className="header-row">
             <CardTitle>현장 모니터링 (CCTV)</CardTitle>
-            <span className="cam-label">1번 카메라 (1구역)</span>
+            <span className="cam-label">1번 카메라</span>
           </div>
           <div className="placeholder-content">
-            <div className="pulse-ring"></div>
             <span className="icon">📹</span>
             <span className="text">스트리밍 연결 중...</span>
           </div>
@@ -357,44 +405,13 @@ const DashboardPage = () => {
             ))}
           </AILogList>
         </AILogGroupCard>
-      </RightColumn>
+      </Flex>
     </ContentGrid>
   );
 };
-
 export default DashboardPage;
 
-// 스타일 컴포넌트는 기존 코드와 동일하게 유지 (수정할 필요 없음)
-
 // --- 🎨 하이엔드 투명도(rgba) 기반 스타일링 ---
-
-const BaseCard = styled.div`
-  background: #ffffff;
-  border-radius: 20px;
-  padding: 1.5em;
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.02),
-    0 10px 15px -3px rgba(0, 0, 0, 0.04);
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-`;
-
-// 여기서 기존 CardTitle을 덮어씁니다 (디자인 통일)
-const CardTitleStyled = styled.h2`
-  font-size: 1.1em;
-  font-weight: 800;
-  color: #0f172a;
-  margin: 0 0 1.2em 0;
-  letter-spacing: -0.02em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  &.white-text {
-    color: #ffffff;
-    margin-bottom: 0.2em;
-  }
-`;
 
 const ContentGrid = styled.div`
   flex: 1;
@@ -419,113 +436,318 @@ const ContentGrid = styled.div`
   }
 `;
 
-const LeftColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.5em;
-  flex: 1;
-  min-height: 0;
-  min-width: 0;
-`;
+const TopSummaryCard = styled(BaseCard)`
+  flex: none;
+  min-height: 200px;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 🚨 완벽한 반반 그리드 분할 */
+  gap: 1.2em; /* 두 위젯 사이의 간격 */
+  padding: 1.2em;
+  background: #ffffff;
 
-const FarmSummaryCard = styled(BaseCard)`
-  flex: 1;
-  min-height: 220px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.3);
-  color: #ffffff;
-
-  .header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-  }
-  .branch-name {
-    font-size: 0.85em;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.8);
-  }
-  .optimal-badge {
-    background: rgba(255, 255, 255, 0.2);
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.8em;
-    font-weight: 800;
-    white-space: nowrap;
-  }
-
-  .summary-body {
+  /* 위젯 공통 베이스 디자인 */
+  .summary-widget {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 1.2em 1.5em;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    flex: 1;
-    margin-top: 1em;
+    border: 1px solid #f1f5f9;
+    transition: all 0.2s ease;
+    min-height: 140px;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      border-color: #e2e8f0;
+    }
   }
-  .main-info {
-    .score-area {
+
+  .widget-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    .w-title {
+      font-size: 0.8em;
+      font-weight: 800;
+      color: #475569;
+    }
+    .w-sub {
+      font-size: 0.7em;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+  }
+
+  /* 🌤️ 날씨 위젯 특화 디자인 */
+  .weather-widget {
+    .widget-body {
       display: flex;
-      align-items: baseline;
-      .score {
-        font-size: 3.5rem;
-        font-weight: 800;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+      .icon-wrapper {
+        font-size: 2.8em;
         line-height: 1;
-        letter-spacing: -0.03em;
+        filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
       }
-      .label {
-        font-size: 0.9rem;
-        margin-left: 6px;
-        color: rgba(255, 255, 255, 0.8);
-        font-weight: 600;
+      .info-wrapper {
+        display: flex;
+        flex-direction: column;
+        .temp-text {
+          font-size: 2.2em;
+          font-weight: 900;
+          color: #0f172a;
+          line-height: 1;
+          letter-spacing: -0.05em;
+          span {
+            font-size: 0.5em;
+            font-weight: 700;
+            color: #64748b;
+            margin-left: 2px;
+          }
+        }
+        .desc-text {
+          font-size: 0.85em;
+          font-weight: 700;
+          color: #64748b;
+          margin-top: 6px;
+        }
       }
     }
-    .status-text {
-      margin: 0.5em 0 0 0;
-      font-size: 0.9em;
-      color: rgba(255, 255, 255, 0.9);
+    .widget-footer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      .aqi-badge {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        font-size: 0.7em;
+        font-weight: 800;
+        color: #475569;
+        padding: 4px 8px;
+        border-radius: 6px;
+      }
+      .aqi-desc {
+        font-size: 0.7em;
+        font-weight: 600;
+        color: #94a3b8;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  /* 🎯 점수 위젯 특화 디자인 (초록색 그라데이션 포인트) */
+  .score-widget {
+    background: linear-gradient(145deg, #f0fdf4 0%, #ecfdf5 100%);
+    border-color: #d1fae5;
+    .w-title {
+      color: #059669;
+    }
+
+    .score-body {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-end;
+      gap: 20px;
+      flex: 1;
+      padding-bottom: 4px;
+
+      .score-value {
+        font-size: 3.8em;
+        font-weight: 900;
+        color: #059669;
+        line-height: 0.85;
+        letter-spacing: -0.05em;
+        span {
+          font-size: 0.3em;
+          font-weight: 800;
+          color: #10b981;
+          margin-left: 4px;
+        }
+      }
+      .score-details {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 2px;
+        .phase-badge {
+          align-self: flex-start;
+          background: #059669;
+          color: #fff;
+          font-size: 0.75em;
+          font-weight: 800;
+          padding: 4px 10px;
+          border-radius: 20px;
+          box-shadow: 0 2px 6px rgba(5, 150, 105, 0.2);
+        }
+        .status-text {
+          font-size: 0.85em;
+          font-weight: 800;
+          color: #065f46;
+          word-break: keep-all;
+        }
+      }
+    }
+  }
+`;
+
+const WaterSystemCard = styled(BaseCard)`
+  flex: none;
+  min-height: 200px;
+  padding: 1.2em 1.5em;
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1em;
+    h2 {
+      margin: 0;
+    }
+  }
+  .status-badge {
+    font-size: 0.75em;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: #f1f5f9;
+    color: #64748b;
+    &.active {
+      background: #ecfdf5;
+      color: #10b981;
+    }
+  }
+
+  .system-body {
+    display: flex;
+    gap: 1.5em;
+    align-items: center;
+  }
+
+  .tank-visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    .tank-bg {
+      width: 60px;
+      height: 90px;
+      border: 3px solid #cbd5e1;
+      border-radius: 8px 8px 12px 12px;
+      border-top: none;
+      position: relative;
+      overflow: hidden;
+      background: #f8fafc;
+    }
+    .tank-fill {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+      transition: height 1s ease-in-out;
+    }
+    .tank-label {
+      font-size: 0.75em;
+      font-weight: 800;
+      color: #64748b;
+      white-space: nowrap;
+    }
+  }
+
+  .system-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85em;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 4px;
+      .i-label {
+        color: #64748b;
+        font-weight: 700;
+      }
+      .i-value {
+        font-weight: 900;
+        color: #0f172a;
+        &.highlight {
+          color: #0284c7;
+        }
+        &.normal {
+          color: #10b981;
+        }
+      }
+    }
+    .system-desc {
+      font-size: 0.7em;
+      color: #94a3b8;
       font-weight: 600;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+  }
+`;
+
+const DeviceLogItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+  &.active {
+    border-left-color: #10b981;
+  }
+  &.done {
+    border-left-color: #cbd5e1;
+  }
+
+  .time {
+    font-size: 0.75em;
+    font-weight: 800;
+    color: #94a3b8;
+    width: 40px;
+    flex-shrink: 0;
+  }
+  .log-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    .device {
+      font-size: 0.9em;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .desc {
+      font-size: 0.75em;
+      font-weight: 600;
+      color: #64748b;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
   }
-  .metrics-row {
-    display: flex;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.15);
-    padding: 1em;
-    border-radius: 16px;
-    margin-top: 1em;
-    .divider {
-      width: 1px;
-      height: 30px;
-      background: rgba(255, 255, 255, 0.2);
-      margin: 0 1em;
-      flex-shrink: 0;
+  .action {
+    font-size: 0.8em;
+    font-weight: 800;
+    flex-shrink: 0;
+    &.active {
+      color: #10b981;
     }
-    .metric-box {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4em;
-      flex: 1;
-      min-width: 0;
-      .m-label {
-        font-size: 0.75em;
-        color: rgba(255, 255, 255, 0.8);
-        font-weight: 700;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .m-value {
-        font-size: 1em;
-        font-weight: 800;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        &.warning {
-          color: #fecaca;
-        }
-      }
+    &.done {
+      color: #94a3b8;
     }
   }
 `;
@@ -604,14 +826,6 @@ const SensorItem = styled.div`
   }
 `;
 
-const MiddleColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.5em;
-  flex: 1;
-  min-height: 0;
-  min-width: 0;
-`;
 const LogGroupCard = styled(BaseCard)`
   flex: 1;
   min-height: 0;
@@ -650,105 +864,6 @@ const LogList = styled.div`
     background: #e2e8f0;
     border-radius: 4px;
   }
-`;
-const DeviceLogItem = styled.div`
-  background: #f8fafc;
-  border-radius: 16px;
-  padding: 1.2em 1.5em;
-  display: flex;
-  flex-direction: column;
-  gap: 0.8em;
-  min-width: 0;
-  transition:
-    transform 0.2s ease,
-    background 0.2s ease;
-  border-left: 4px solid transparent;
-  &:hover {
-    background: #ffffff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-    transform: translateY(-2px);
-  }
-  &.active {
-    border-left-color: #10b981;
-    background: rgba(16, 185, 129, 0.03);
-  }
-  &.done {
-    border-left-color: #94a3b8;
-  }
-  .log-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    .badges {
-      display: flex;
-      gap: 0.5em;
-      .sector-badge {
-        font-size: 0.75em;
-        font-weight: 800;
-        color: #475569;
-        background: #e2e8f0;
-        padding: 4px 10px;
-        border-radius: 8px;
-      }
-      .zone-badge {
-        font-size: 0.75em;
-        font-weight: 700;
-        color: #64748b;
-        padding: 4px 0;
-      }
-    }
-    .time {
-      font-size: 0.8em;
-      font-weight: 800;
-      color: #94a3b8;
-    }
-  }
-  .log-mid {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    .device {
-      font-size: 1.1em;
-      font-weight: 800;
-      color: #0f172a;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .action {
-      font-size: 0.9em;
-      font-weight: 800;
-      white-space: nowrap;
-      flex-shrink: 0;
-      &.active {
-        color: #10b981;
-      }
-      &.done {
-        color: #64748b;
-      }
-    }
-  }
-  .log-bot {
-    .desc {
-      font-size: 0.85em;
-      font-weight: 600;
-      color: #64748b;
-      line-height: 1.4;
-      display: block;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
-`;
-
-const RightColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.5em;
-  flex: 1;
-  min-height: 0;
-  min-width: 0;
 `;
 
 const CameraCard = styled(BaseCard)`

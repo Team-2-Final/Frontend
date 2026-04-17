@@ -1,25 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { useOutletContext } from 'react-router-dom';
-
-const BaseCard = styled.div`
-  background: #ffffff;
-  border-radius: 20px;
-  padding: 1.5em;
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.02),
-    0 10px 15px -3px rgba(0, 0, 0, 0.04);
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-`;
-
-const CardTitle = styled.h2`
-  font-size: 1.1em;
-  font-weight: 800;
-  color: #0f172a;
-  margin: 0 0 1.2em 0;
-`;
+import { BaseCard, CardTitle, Flex } from './Styles/AdminShared';
 
 const DataAnalysisPage = () => {
   const { selectedBranch } = useOutletContext();
@@ -93,8 +75,10 @@ const DataAnalysisPage = () => {
   const tempAreaPoints = `0,100 ${tempPoints} 100,100`;
 
   return (
-    <DashboardGrid>
-      <LeftColumn>
+    // 🚨 DashboardGrid 대신 Flex 적용
+    <Flex gap="1.5em" flex="1" style={{ minHeight: 0 }}>
+      {/* 🚨 LeftColumn 대신 Flex 적용 */}
+      <Flex dir="column" gap="1.5em" flex="1" style={{ minWidth: 0 }}>
         <FilterCard>
           <FilterGroup>
             <FilterItem className="location-box">
@@ -152,9 +136,10 @@ const DataAnalysisPage = () => {
             </StyledTable>
           </TableWrapper>
         </TableCard>
-      </LeftColumn>
+      </Flex>
 
-      <RightColumn>
+      {/* 🚨 RightColumn 대신 Flex 적용 */}
+      <Flex dir="column" gap="1.5em" flex="1" style={{ minWidth: 0 }}>
         <KpiRow>
           <MiniKpiCard>
             <div className="label">주간 평균 온도</div>
@@ -266,42 +251,14 @@ const DataAnalysisPage = () => {
             </GraphArea>
           </ChartContainer>
         </GraphCard>
-      </RightColumn>
-    </DashboardGrid>
+      </Flex>
+    </Flex>
   );
 };
 
 export default DataAnalysisPage;
 
-// 🚨 주의: 하단의 스타일 컴포넌트들(DashboardGrid, LeftColumn, FilterCard 등)은 기존 파일에 있는 것을 그대로 유지하셔야 합니다!
-
 // --- 🎨 스타일링 ---
-
-const DashboardGrid = styled.div`
-  flex: 1;
-  display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap: 1.5em;
-  min-height: 0;
-  @media (max-width: 1200px) {
-    display: flex;
-    flex-direction: column;
-  }
-`;
-const LeftColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.5em;
-  flex: 1;
-  min-width: 0;
-`;
-const RightColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.5em;
-  flex: 1;
-  min-width: 0;
-`;
 
 /* 🚨 필터 구조: 버튼 완전 삭제, 너비 완전 고정 */
 const FilterCard = styled(BaseCard)`
