@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { useOutletContext } from 'react-router-dom';
-// 🚨 BaseCard는 아래에서 대시보드 전용으로 덮어썼으므로 import에서 제거했습니다!
 import { CardTitle } from './Styles/AdminShared';
 
 const DashboardPage = () => {
@@ -12,48 +11,48 @@ const DashboardPage = () => {
       '천안 본점 (Cheonan Hub)': {
         score: 96,
         phase: '개화기 🌸',
-        status: '작물 활력도 최상 (전주 대비 2% ↗)',
+        status: '작물 활력도 최상 (전주 대비 2% 상승)',
         sensors: [
           {
-            label: '온도',
+            label: '내부 온도',
             value: 24.2,
             unit: '°C',
             trend: '+0.5',
             status: 'stable',
           },
           {
-            label: '습도',
+            label: '내부 습도',
             value: 65,
             unit: '%',
             trend: '-2',
             status: 'down',
           },
           {
-            label: '이산화탄소 농도',
+            label: 'CO2 농도',
             value: 410,
             unit: 'ppm',
             trend: '+15',
             status: 'up',
           },
           {
-            label: 'LED 광량',
+            label: '광합성 광량',
             value: 350,
-            unit: 'μmol/m²/s',
-            trend: 'Sunny',
+            unit: 'PPFD',
+            trend: '최적',
             status: 'stable',
           },
           {
-            label: '토양 EC',
+            label: '토양 양액 농도(EC)',
             value: 1.2,
             unit: 'dS/m',
-            trend: 'Stable',
+            trend: '유지',
             status: 'stable',
           },
           {
-            label: '토양 pH',
+            label: '토양 산도(pH)',
             value: 5.8,
-            unit: '',
-            trend: 'Stable',
+            unit: 'pH',
+            trend: '유지',
             status: 'stable',
           },
         ],
@@ -67,31 +66,31 @@ const DashboardPage = () => {
           {
             id: 1,
             time: '14:10',
-            sector: 'Sector 01',
-            zone: 'Section A',
+            sector: '1구역',
+            zone: 'A블록',
             device: '💧 관수 펌프',
             action: '가동 중',
-            desc: '설정값: Water 2.5L / EC 1.2 투입 완료',
+            desc: '급수 2.5L / 양액 EC 1.2 공급 완료',
             status: 'active',
           },
           {
             id: 2,
             time: '13:30',
-            sector: 'Sector 02',
-            zone: 'Section C',
+            sector: '2구역',
+            zone: 'C블록',
             device: '💨 배기팬 2번',
-            action: 'Level 2 전개',
-            desc: '목표 온도 24°C 도달을 위한 강제 배기',
+            action: '2단계 가동',
+            desc: '설정 온도(24°C) 초과로 인한 강제 배기',
             status: 'active',
           },
           {
             id: 3,
             time: '11:00',
-            sector: 'All Sectors',
-            zone: 'Roof',
+            sector: '전 구역',
+            zone: '상단',
             device: '🌤️ 차광 스크린',
-            action: '50% 닫힘',
-            desc: '외부 일사량 초과로 인한 연동 제어',
+            action: '50% 전개',
+            desc: '외부 일사량 과다 감지 및 차단 조치',
             status: 'done',
           },
         ],
@@ -99,48 +98,48 @@ const DashboardPage = () => {
       '천안 제2센터 (Cheonan B2)': {
         score: 88,
         phase: '정식기 🌱',
-        status: '초기 활착 진행 중 (안정)',
+        status: '초기 활착 안정적 진행 중',
         sensors: [
           {
-            label: 'Temperature',
+            label: '내부 온도',
             value: 22.5,
             unit: '°C',
             trend: '+0.2',
             status: 'stable',
           },
           {
-            label: 'Humidity',
+            label: '내부 습도',
             value: 70,
             unit: '%',
             trend: '+5',
             status: 'up',
           },
           {
-            label: 'CO2 Level',
+            label: 'CO2 농도',
             value: 450,
             unit: 'ppm',
             trend: '-10',
             status: 'down',
           },
           {
-            label: 'Radiation',
+            label: '광량(일사량)',
             value: 280,
             unit: 'W/m²',
-            trend: 'Cloudy',
+            trend: '흐림',
             status: 'stable',
           },
           {
-            label: 'Soil EC',
+            label: '토양 양액 농도(EC)',
             value: 1.0,
             unit: 'dS/m',
-            trend: 'Stable',
+            trend: '유지',
             status: 'stable',
           },
           {
-            label: 'Soil pH',
+            label: '토양 산도(pH)',
             value: 6.0,
-            unit: '',
-            trend: 'Stable',
+            unit: 'pH',
+            trend: '유지',
             status: 'stable',
           },
         ],
@@ -154,21 +153,21 @@ const DashboardPage = () => {
           {
             id: 1,
             time: '14:15',
-            sector: 'Sector 01',
-            zone: 'Section B',
+            sector: '1구역',
+            zone: 'B블록',
             device: '🌡️ 온풍기',
-            action: '가동 대기',
-            desc: '야간 목표 온도 18°C 설정 완료',
+            action: '대기 모드',
+            desc: '야간 설정 온도 18°C 대기 중',
             status: 'done',
           },
           {
             id: 2,
             time: '12:00',
-            sector: 'Sector 03',
-            zone: 'Nursery',
+            sector: '3구역',
+            zone: '육묘실',
             device: '💡 LED 보광등',
-            action: '점등',
-            desc: '일조량 부족 감지 -> 주간 모드 전환',
+            action: '점등 가동',
+            desc: '일조량 부족 감지 -> 광량 보충 실행',
             status: 'active',
           },
         ],
@@ -183,11 +182,10 @@ const DashboardPage = () => {
 
   useEffect(() => {
     setLiveSensors(currentData.sensors);
-
     const interval = setInterval(() => {
       setLiveSensors((prev) =>
         prev.map((s) => {
-          if (s.label === 'Temperature' || s.label === 'Humidity') {
+          if (s.label === '내부 온도' || s.label === '내부 습도') {
             const fluctuate = Math.random() * 0.2 - 0.1;
             return {
               ...s,
@@ -198,7 +196,6 @@ const DashboardPage = () => {
         }),
       );
     }, 3000);
-
     return () => clearInterval(interval);
   }, [selectedBranch, currentData]);
 
@@ -206,14 +203,14 @@ const DashboardPage = () => {
     {
       time: '14:25',
       status: 'action',
-      title: '관수량 10% 증가 권장',
-      desc: '오후 일사량 급증 예상 (신뢰도: 95%)',
+      title: '관수량 10% 증량 권장',
+      desc: '오후 일사량 급증 예상 (AI 예측 신뢰도: 95%)',
     },
     {
       time: '13:55',
       status: 'warning',
-      title: '환기 타이밍 경고',
-      desc: '향후 1시간 내 내부 온도 28°C 돌파 예상',
+      title: '고온 피해 주의보',
+      desc: '1시간 내 내부 온도 28°C 돌파 예상 - 환기 필요',
     },
   ];
 
@@ -223,35 +220,37 @@ const DashboardPage = () => {
         <FarmSummaryCard>
           <div className="header-row">
             <div>
-              <CardTitle className="white-text">농장 현황</CardTitle>
+              <CardTitle className="white-text">종합 관제 현황</CardTitle>
               <div className="branch-name">{selectedBranch}</div>
             </div>
-            <span className="optimal-badge">Phase: {currentData.phase}</span>
+            <span className="optimal-badge">
+              생육 단계: {currentData.phase}
+            </span>
           </div>
           <div className="summary-body">
             <div className="main-info">
               <div className="score-area">
                 <span className="score">{currentData.score}</span>
-                <span className="label">/ 100 pt</span>
+                <span className="label">점</span>
               </div>
               <p className="status-text">{currentData.status}</p>
             </div>
             <div className="metrics-row">
               <div className="metric-box">
-                <span className="m-label">진행중인 이슈</span>
-                <span className="m-value warning">⚠️ 1 건 확인 요망</span>
+                <span className="m-label">미조치 알림</span>
+                <span className="m-value warning">⚠️ 1건 확인 필요</span>
               </div>
               <div className="divider"></div>
               <div className="metric-box">
-                <span className="m-label">다음 예정 작업</span>
-                <span className="m-value normal">자동 방제 (14:00)</span>
+                <span className="m-label">예정된 자동 제어</span>
+                <span className="m-value normal">전 구역 방제 (14:00)</span>
               </div>
             </div>
           </div>
         </FarmSummaryCard>
 
         <SensorsGroupCard>
-          <CardTitle>실시간 센서 데이터</CardTitle>
+          <CardTitle>환경 측정 데이터</CardTitle>
           <SensorGrid>
             {liveSensors.map((sensor, index) => (
               <SensorItem key={index}>
@@ -277,8 +276,8 @@ const DashboardPage = () => {
       <MiddleColumn>
         <LogGroupCard>
           <div className="log-header">
-            <CardTitle>Device Activity Logs</CardTitle>
-            <span className="sub-badge system">System Auto</span>
+            <CardTitle>장치 작동 이력</CardTitle>
+            <span className="sub-badge system">시스템 자동</span>
           </div>
           <LogList>
             {currentData.logs.map((log) => (
@@ -306,33 +305,33 @@ const DashboardPage = () => {
       <RightColumn>
         <CameraCard>
           <div className="header-row">
-            <CardTitle>Live Feed</CardTitle>
-            <span className="cam-label">Cam 01 (Sector 01)</span>
+            <CardTitle>현장 모니터링 (CCTV)</CardTitle>
+            <span className="cam-label">1번 카메라 (1구역)</span>
           </div>
           <div className="placeholder-content">
             <div className="pulse-ring"></div>
             <span className="icon">📹</span>
-            <span className="text">Connecting to Stream...</span>
+            <span className="text">스트리밍 연결 중...</span>
           </div>
         </CameraCard>
 
         <GrowthCard>
-          <CardTitle>Crop Status</CardTitle>
+          <CardTitle>작물 생육 지표</CardTitle>
           <GrowthGrid>
             <div className="g-item">
-              <span className="l">초장 (Height)</span>
+              <span className="l">초장 (식물 높이)</span>
               <span className="v">{currentData.growth.height}</span>
             </div>
             <div className="g-item">
-              <span className="l">엽수 (Leaves)</span>
+              <span className="l">엽수 (잎 개수)</span>
               <span className="v">{currentData.growth.leafCount}</span>
             </div>
             <div className="g-item">
-              <span className="l">엽장 (Length)</span>
+              <span className="l">엽장 (잎 길이)</span>
               <span className="v">{currentData.growth.leafLength}</span>
             </div>
             <div className="g-item">
-              <span className="l">엽폭 (Width)</span>
+              <span className="l">엽폭 (잎 너비)</span>
               <span className="v">{currentData.growth.leafWidth}</span>
             </div>
           </GrowthGrid>
@@ -340,8 +339,8 @@ const DashboardPage = () => {
 
         <AILogGroupCard>
           <div className="log-header">
-            <CardTitle>AI Insights</CardTitle>
-            <span className="sub-badge ai">AI Active</span>
+            <CardTitle>AI 분석 보고서</CardTitle>
+            <span className="sub-badge ai">AI 모니터링 중</span>
           </div>
           <AILogList>
             {aiLogs.map((log, index) => (
@@ -364,6 +363,8 @@ const DashboardPage = () => {
 };
 
 export default DashboardPage;
+
+// 스타일 컴포넌트는 기존 코드와 동일하게 유지 (수정할 필요 없음)
 
 // --- 🎨 하이엔드 투명도(rgba) 기반 스타일링 ---
 

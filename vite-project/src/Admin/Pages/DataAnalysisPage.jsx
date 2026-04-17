@@ -25,6 +25,7 @@ const DataAnalysisPage = () => {
   const { selectedBranch } = useOutletContext();
   const [selectedBatch, setSelectedBatch] = useState('batch_1');
 
+  // 🚨 영문 지표를 B2B 실무 한글로 교체
   const dataByBatch = {
     batch_1: {
       avgTemp: 23.9,
@@ -40,13 +41,13 @@ const DataAnalysisPage = () => {
         { label: '04-07', temp: 25, water: 16 },
       ],
       logs: [
-        { time: '14:00', t: 25.1, h: 60, ai: '적정 범위 유지 (Maintain)' },
-        { time: '13:00', t: 25.5, h: 58, ai: '급수 2.0L 가동 (Watering)' },
+        { time: '14:00', t: 25.1, h: 60, ai: '적정 생육 범위 유지' },
+        { time: '13:00', t: 25.5, h: 58, ai: '일일 관수 2.0L 추가 가동' },
         {
           time: '12:00',
           t: 26.0,
           h: 55,
-          ai: '환기팬 2단계 가동 (Ventilation)',
+          ai: '강제 환기팬 2단계 가동',
         },
       ],
     },
@@ -64,9 +65,9 @@ const DataAnalysisPage = () => {
         { label: '04-07', temp: 22, water: 14 },
       ],
       logs: [
-        { time: '14:00', t: 22.1, h: 55, ai: '야간 모드 최적화 (Night Mode)' },
-        { time: '13:00', t: 21.8, h: 52, ai: '보온 덮개 작동 (Heating)' },
-        { time: '12:00', t: 20.5, h: 50, ai: '유동팬 정지 (Fan Off)' },
+        { time: '14:00', t: 22.1, h: 55, ai: '야간 생육 모드 최적화' },
+        { time: '13:00', t: 21.8, h: 52, ai: '보온 덮개 100% 전개' },
+        { time: '12:00', t: 20.5, h: 50, ai: '내부 유동팬 가동 중지' },
       ],
     },
   };
@@ -94,38 +95,41 @@ const DataAnalysisPage = () => {
   return (
     <DashboardGrid>
       <LeftColumn>
-        {/* 🚨 버튼 삭제 및 박스 크기 고정된 필터 레이아웃 */}
         <FilterCard>
           <FilterGroup>
             <FilterItem className="location-box">
-              <span className="label">LOCATION</span>
+              <span className="label">관제 지점 (Location)</span>
               <span className="value" title={selectedBranch}>
                 {selectedBranch}
               </span>
             </FilterItem>
             <div className="divider"></div>
             <FilterItem className="batch-box">
-              <span className="label">ACTIVE BATCH</span>
+              <span className="label">대상 작기 (Active Batch)</span>
               <select
                 value={selectedBatch}
                 onChange={(e) => setSelectedBatch(e.target.value)}
               >
-                <option value="batch_1">Batch #01 (토마토 - 26.02.10)</option>
-                <option value="batch_2">Batch #02 (토마토 - 26.03.15)</option>
+                <option value="batch_1">
+                  작기 #01 (토마토 - 26.02.10 정식)
+                </option>
+                <option value="batch_2">
+                  작기 #02 (토마토 - 26.03.15 정식)
+                </option>
               </select>
             </FilterItem>
           </FilterGroup>
         </FilterCard>
 
         <TableCard>
-          <CardTitle>Inference Log</CardTitle>
+          <CardTitle>AI 제어 추론 일지 (Inference Log)</CardTitle>
           <TableWrapper>
             <StyledTable>
               <thead>
                 <tr>
-                  <th>Time</th>
-                  <th>Sensor (T/H)</th>
-                  <th>AI Decision</th>
+                  <th>발생 시간</th>
+                  <th>환경 (온도/습도)</th>
+                  <th>AI 판단 및 조치내역</th>
                 </tr>
               </thead>
               <tbody>
@@ -153,21 +157,21 @@ const DataAnalysisPage = () => {
       <RightColumn>
         <KpiRow>
           <MiniKpiCard>
-            <div className="label">Avg Temp</div>
+            <div className="label">주간 평균 온도</div>
             <div className="value">
               {currentData.avgTemp}
               <span className="unit">°C</span>
             </div>
           </MiniKpiCard>
           <MiniKpiCard className="highlight">
-            <div className="label">Growth</div>
+            <div className="label">주간 누적 생장량</div>
             <div className="value">
               +{currentData.growth}
               <span className="unit">cm</span>
             </div>
           </MiniKpiCard>
           <MiniKpiCard>
-            <div className="label">Daily Water</div>
+            <div className="label">일일 누적 관수량</div>
             <div className="value">
               {currentData.water}
               <span className="unit">L</span>
@@ -175,10 +179,9 @@ const DataAnalysisPage = () => {
           </MiniKpiCard>
         </KpiRow>
 
-        {/* 📉 절대 안 깨지는 SVG 면적 차트 (온도) */}
         <GraphCard>
           <CardTitle style={{ marginBottom: '15px' }}>
-            Temperature Trend
+            온도 변화 추이 (Temperature Trend)
           </CardTitle>
           <ChartContainer>
             <YAxis>
@@ -225,10 +228,9 @@ const DataAnalysisPage = () => {
           </ChartContainer>
         </GraphCard>
 
-        {/* 📊 관수량 막대 그래프 */}
         <GraphCard>
           <CardTitle style={{ marginBottom: '15px' }}>
-            Water Supply Stats
+            관수량 누적 통계 (Water Supply Stats)
           </CardTitle>
           <ChartContainer>
             <YAxis>
@@ -270,6 +272,8 @@ const DataAnalysisPage = () => {
 };
 
 export default DataAnalysisPage;
+
+// 🚨 주의: 하단의 스타일 컴포넌트들(DashboardGrid, LeftColumn, FilterCard 등)은 기존 파일에 있는 것을 그대로 유지하셔야 합니다!
 
 // --- 🎨 스타일링 ---
 
