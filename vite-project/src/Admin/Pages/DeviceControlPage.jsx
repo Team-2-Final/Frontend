@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { useOutletContext } from 'react-router-dom';
-import { BaseCard, CardTitle } from './Styles/AdminShared';
+import { BaseCard, CardTitle, Flex } from './Styles/AdminShared';
 
 const DeviceControlPage = () => {
   const { selectedBranch } = useOutletContext();
@@ -163,7 +163,8 @@ const DeviceControlPage = () => {
       </SubMenuWrapper>
 
       <LayoutGrid>
-        <LeftColumn>
+        {/* 🚨 LeftColumn 대신 Flex 사용 */}
+        <Flex dir="column" gap="1.5em" style={{ minWidth: 0 }}>
           <ControlGroupCard>
             <div
               className="header-flex"
@@ -179,7 +180,6 @@ const DeviceControlPage = () => {
             </div>
 
             <DeviceGrid>
-<<<<<<< HEAD
               {currentDevices.map((device) => (
                 <DeviceCard
                   key={device.id}
@@ -198,81 +198,6 @@ const DeviceControlPage = () => {
                         alignItems: 'center',
                       }}
                     >
-=======
-              {currentDevices.map((device) => {
-                const isWarning =
-                  device.value < device.safeMin ||
-                  device.value > device.safeMax;
-                return (
-                  <DeviceCard
-                    key={device.id}
-                    onClick={() => handleSelectDevice(device)}
-                    className={selectedId === device.id ? 'selected' : ''}
-                  >
-                    <div className="card-top">
-                      <span className="device-name">{device.name}</span>
-                      <ToggleWrapper
-                        $isOn={device.isAuto}
-                        onClick={(e) => handleToggleAuto(device.id, e)}
-                      >
-                        <div className="toggle-bg">
-                          <div className="toggle-knob"></div>
-                        </div>
-                      </ToggleWrapper>
-                    </div>
-
-                    <MiniChartWrapper>
-                      <svg viewBox="0 0 100 30" preserveAspectRatio="none">
-                        <defs>
-                          <linearGradient
-                            id={`grad-${device.id}`}
-                            x1="0%"
-                            y1="0%"
-                            x2="0%"
-                            y2="100%"
-                          >
-                            <stop
-                              offset="0%"
-                              stopColor={isWarning ? '#EF4444' : '#10B981'}
-                              stopOpacity="0.3"
-                            />
-                            <stop
-                              offset="100%"
-                              stopColor={isWarning ? '#EF4444' : '#10B981'}
-                              stopOpacity="0"
-                            />
-                          </linearGradient>
-                        </defs>
-                        <path
-                          d={`M 0,30 ${getTrendData.map((v, i) => `L ${i * 14.3},${30 - (v / 100) * 30}`).join(' ')} L 100,30 Z`}
-                          fill={`url(#grad-${device.id})`}
-                        />
-                        <polyline
-                          fill="none"
-                          stroke={isWarning ? '#EF4444' : '#10B981'}
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          points={getTrendData
-                            .map((v, i) => `${i * 14.3},${30 - (v / 100) * 30}`)
-                            .join(' ')}
-                        />
-                        {(() => {
-                          const lastVal = getTrendData[getTrendData.length - 1];
-                          return (
-                            <circle
-                              cx="100"
-                              cy={30 - (lastVal / 100) * 30}
-                              r="3"
-                              fill={isWarning ? '#EF4444' : '#10B981'}
-                            />
-                          );
-                        })()}
-                      </svg>
-                    </MiniChartWrapper>
-
-                    <div className="card-bottom">
->>>>>>> e39c9cef2216581ecee4ce46559c03168e9ccb55
                       <span
                         className={`status-tag ${device.isAuto ? 'auto' : 'manual'}`}
                       >
@@ -320,9 +245,9 @@ const DeviceControlPage = () => {
               ))}
             </HistoryList>
           </HistoryCard>
-        </LeftColumn>
+        </Flex>
 
-        <RightColumn>
+        <Flex dir="column" style={{ minWidth: 0 }}>
           <DetailCard>
             <CardTitle>세부 목표 수치 개입</CardTitle>
             {!selectedDevice ? (
@@ -436,7 +361,7 @@ const DeviceControlPage = () => {
               </PremiumControlArea>
             )}
           </DetailCard>
-        </RightColumn>
+        </Flex>
       </LayoutGrid>
     </>
   );
@@ -486,19 +411,7 @@ const SubMenuBtn = styled.button`
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
   }
 `;
-const LeftColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.5em;
-  flex: 1;
-  min-width: 0;
-`;
-const RightColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 0;
-`;
+
 const ControlGroupCard = styled(BaseCard)`
   flex: 2;
   padding: 1.5em;
@@ -539,6 +452,7 @@ const DeviceGrid = styled.div`
   }
 `;
 const DeviceCard = styled.div`
+  margin-top: 6px;
   background: #f8fafc;
   border-radius: 16px;
   padding: 1.2em;
