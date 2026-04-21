@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { logout } from "../../api/auth";
 
 // --- 🚨 형님이 만드신 고퀄리티 SVG 아이콘 그대로 이식 ---
 const Icons = {
@@ -124,10 +125,6 @@ export default function SideDrawer({ open, onClose }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    onClose();
-    navigate('/Login');
-  };
 
   const menus = [
     { label: 'Home', path: '/field', icon: <Icons.Dashboard /> },
@@ -135,6 +132,32 @@ export default function SideDrawer({ open, onClose }) {
     { label: 'Camera', path: '/field/camera', icon: <Icons.Camera /> },
     { label: 'Control', path: '/field/control', icon: <Icons.Sliders /> },
   ];
+
+
+  const handleLogout = async () => {
+      console.log("🔥 logout clicked");
+      try {
+        const refresh = localStorage.getItem("refresh_token");
+  
+        if (refresh) {
+          await logout(refresh);
+        }
+  
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+  
+        navigate("/login");
+  
+      } catch (err) {
+        console.error(err);
+  
+        // 실패해도 강제 로그아웃
+        localStorage.clear();
+        navigate("/login");
+      }
+    };
+    console.log("logout fn:", logout);
+
 
   return (
     <>

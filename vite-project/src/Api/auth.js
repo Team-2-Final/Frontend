@@ -20,3 +20,11 @@ export const refreshToken = async (refresh_token) => {
   });
   return res.data;
 };
+
+// 로그아웃
+export const logout = async (refresh_token) => {
+  const res = await client.post("/auth/logout", {
+    refresh_token,
+  });
+  return res.data;
+};
