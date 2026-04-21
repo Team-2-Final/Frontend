@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { logout } from "../../api/auth";
 
 // --- 아이콘 (기존 유지) ---
 const Icons = {
@@ -128,6 +129,31 @@ const Sidebar = ({ activeMenu, isOpen, closeSidebar }) => {
     if (closeSidebar) closeSidebar();
   };
 
+
+  const handleLogout = async () => {
+    console.log("🔥 logout clicked");
+    try {
+      const refresh = localStorage.getItem("refresh_token");
+
+      if (refresh) {
+        await logout(refresh);
+      }
+
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+
+      navigate("/login");
+
+    } catch (err) {
+      console.error(err);
+
+      // 실패해도 강제 로그아웃
+      localStorage.clear();
+      navigate("/login");
+    }
+  };
+  console.log("logout fn:", logout);
+
   return (
     <SidebarContainer $isOpen={isOpen}>
       {/* 1. 로고 영역 */}
@@ -198,7 +224,7 @@ const Sidebar = ({ activeMenu, isOpen, closeSidebar }) => {
             <div className="role">총괄 관제 센터장</div>
           </div>
         </UserProfile>
-        <LogoutBtn onClick={() => handleNavigate('/Login')}>
+        <LogoutBtn onClick={handleLogout}>
           <div className="nav-icon">
             <Icons.Logout />
           </div>
