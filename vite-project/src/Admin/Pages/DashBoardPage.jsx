@@ -595,7 +595,8 @@ const WeatherMiniCard = styled(BaseCard)`
     align-items: center;
     gap: 0.5em;
     flex-wrap: wrap;
-    margin-top: 0.9em;
+    margin-top: 0.1em;
+    margin-bottom: 1.2em;
   }
 
   .badge {
@@ -617,22 +618,25 @@ const WeatherMiniCard = styled(BaseCard)`
 const ScoreMiniCard = styled(BaseCard)`
   min-height: 190px;
   background: #eaf8f1;
-
+ 
+ 
+  // small-title = "종합 생육 점수" 
   .small-title {
     font-size: 0.92em;
     font-weight: 800;
     color: #10b981;
     letter-spacing: -0.02em;
-    margin-bottom: 0.9em;
+    margin-bottom: 4em;
   }
 
+  // scroe = 96
   .score {
-    font-size: 3.4rem;
-    font-weight: 800;
+    font-size: 2rem;
+    font-weight: 700;
     line-height: 1;
     color: #10b981;
     letter-spacing: -0.03em;
-    margin-bottom: 0.45em;
+    margin-bottom: 0.5em;
   }
 
   .phase-badge {
