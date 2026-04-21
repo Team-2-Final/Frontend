@@ -30,7 +30,7 @@ client.interceptors.response.use(
       try {
         const refresh_token = localStorage.getItem("refresh_token");
 
-        const res = await client.post("/auth/refresh", {
+        const res = await client.post("auth/refresh", {
           refresh_token,
         });
 

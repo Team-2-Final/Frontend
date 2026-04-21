@@ -28,3 +28,9 @@ export const logout = async (refresh_token) => {
   });
   return res.data;
 };
+
+// 사용자 정보 (추가됨)
+export const getMe = async () => {
+  const res = await client.get("/auth/me");
+  return res.data;
+};

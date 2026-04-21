@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { logout } from "../../api/auth";
+import { logout, getMe } from "../../api/auth";
+import { useEffect, useState } from "react";
 
 // --- 아이콘 (기존 유지) ---
 const Icons = {
@@ -122,13 +123,41 @@ const Icons = {
 };
 
 const Sidebar = ({ activeMenu, isOpen, closeSidebar }) => {
+
+  const [user, setUser] = useState(null);
+
   const navigate = useNavigate();
+
 
   const handleNavigate = (path) => {
     navigate(path);
     if (closeSidebar) closeSidebar();
   };
 
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await getMe();
+        setUser(data);
+      } catch (err) {
+        console.error("user load fail", err);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+
+  const getRoleLabel = (role) => {
+    switch (role) {
+      case "ADMIN":
+        return "총괄 관제 센터장";
+      case "USER":
+      default:
+        return "사용자";
+    }
+  };
 
   const handleLogout = async () => {
     console.log("🔥 logout clicked");
@@ -215,15 +244,21 @@ const Sidebar = ({ activeMenu, isOpen, closeSidebar }) => {
       {/* 3. 하단 유저 프로필 & 로그아웃 영역 */}
       <BottomArea>
         <div className="menu-label">시스템 관리</div>
-        <UserProfile>
-          <div className="avatar">
-            <Icons.User />
+       <UserProfile>
+        <div className="avatar">
+          <Icons.User />
+        </div>
+        
+        <div className="user-info">
+          <div className="name">
+            {user?.username ?? "로딩중..."}
           </div>
-          <div className="user-info">
-            <div className="name">마스터 관리자</div>
-            <div className="role">총괄 관제 센터장</div>
+        
+          <div className="role">
+            {user?.role ? getRoleLabel(user.role) : ""}
           </div>
-        </UserProfile>
+        </div>
+      </UserProfile>
         <LogoutBtn onClick={handleLogout}>
           <div className="nav-icon">
             <Icons.Logout />

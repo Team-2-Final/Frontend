@@ -1,7 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { logout } from "../../api/auth";
+import { logout, getMe } from "../../api/auth";
+import { useEffect, useState } from "react";
 
 // --- 🚨 형님이 만드신 고퀄리티 SVG 아이콘 그대로 이식 ---
 const Icons = {
@@ -125,6 +126,7 @@ export default function SideDrawer({ open, onClose }) {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const [user, setUser] = useState(null);
 
   const menus = [
     { label: 'Home', path: '/field', icon: <Icons.Dashboard /> },
@@ -133,6 +135,19 @@ export default function SideDrawer({ open, onClose }) {
     { label: 'Control', path: '/field/control', icon: <Icons.Sliders /> },
   ];
 
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await getMe();
+        setUser(data);
+      } catch (err) {
+        console.error("user load fail", err);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const handleLogout = async () => {
       console.log("🔥 logout clicked");
@@ -158,6 +173,16 @@ export default function SideDrawer({ open, onClose }) {
     };
     console.log("logout fn:", logout);
 
+
+    const getRoleLabel = (role) => {
+      switch (role) {
+        case "ADMIN":
+          return "총괄 관제 센터장";
+        case "USER":
+        default:
+          return "사용자";
+      }
+    };
 
   return (
     <>
@@ -205,9 +230,15 @@ export default function SideDrawer({ open, onClose }) {
             <div className="avatar">
               <Icons.User />
             </div>
+                  
             <div className="user-info">
-              <div className="name">Field Worker</div>
-              <div className="role">Sector 01 Team</div>
+              <div className="name">
+                {user?.username ?? "로딩중..."}
+              </div>
+                  
+              <div className="role">
+                {user?.role ? getRoleLabel(user.role) : ""}
+              </div>
             </div>
           </UserProfile>
           <LogoutBtn onClick={handleLogout}>
