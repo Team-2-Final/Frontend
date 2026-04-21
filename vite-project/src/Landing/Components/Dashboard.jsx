@@ -8,7 +8,10 @@ import {
   SectionLabel,
 } from '../styles/landingStyled';
 import { useScrollFadeIn } from '../../hooks/useScrollFadeIn';
-import { useState, useRef } from 'react';
+
+/* -------------------------------------------------------------------------- */
+/* DATA DEFINITIONS                                                           */
+/* -------------------------------------------------------------------------- */
 
 const sensorData = [
   {
@@ -18,20 +21,8 @@ const sensorData = [
     trend: '+0.5',
     status: 'stable',
   },
-  {
-    label: 'Humidity',
-    value: '65',
-    unit: '%',
-    trend: '-2',
-    status: 'down',
-  },
-  {
-    label: 'CO2 Level',
-    value: '410',
-    unit: 'ppm',
-    trend: '+15',
-    status: 'up',
-  },
+  { label: 'Humidity', value: '65', unit: '%', trend: '-2', status: 'down' },
+  { label: 'CO2 Level', value: '410', unit: 'ppm', trend: '+15', status: 'up' },
   {
     label: 'Radiation',
     value: '350',
@@ -63,7 +54,7 @@ const deviceLogs = [
     zone: 'Section A',
     device: '💧 관수 펌프',
     action: '가동 중',
-    desc: '설정값: Water 2.5L / EC 1.2 투입 완료',
+    desc: 'Water 2.5L / EC 1.2 투입 완료',
     status: 'active',
   },
   {
@@ -73,7 +64,7 @@ const deviceLogs = [
     zone: 'Section C',
     device: '💨 배기팬 2번',
     action: 'Level 2 전개',
-    desc: '목표 온도 24°C 도달을 위한 강제 배기',
+    desc: '목표 온도 도달을 위한 강제 배기',
     status: 'active',
   },
   {
@@ -83,7 +74,7 @@ const deviceLogs = [
     zone: 'Roof',
     device: '🌤️ 차광 스크린',
     action: '50% 닫힘',
-    desc: '외부 일사량 초과로 인한 연동 제어',
+    desc: '외부 일사량 초과 연동 제어',
     status: 'done',
   },
 ];
@@ -113,39 +104,37 @@ const growthData = [
 const showcaseCards = [
   {
     title: '실시간 센서 모니터링',
-    desc: '온도, 습도, CO₂, EC, pH 등 핵심 환경 데이터를 실시간으로 확인합니다.',
+    desc: '온도, 습도, CO₂, EC 등 핵심 데이터를 실시간 확인합니다.',
     className: 'leftTop',
-    feature: 'sensors',
   },
   {
     title: '비전 기반 생육 분석',
-    desc: '카메라를 통해 잎 상태와 생육 편차를 분석하고 이상 징후를 빠르게 파악합니다.',
+    desc: '카메라를 통해 잎 상태와 생육 편차를 파악합니다.',
     className: 'leftBottom',
-    feature: 'vision',
   },
   {
     title: '이상 알림 및 경고',
-    desc: '환경 변화와 생육 패턴을 바탕으로 위험 신호를 먼저 알려줍니다.',
+    desc: '환경 변화와 생육 패턴을 바탕으로 위험 신호를 알려줍니다.',
     className: 'rightTop',
-    feature: 'alerts',
   },
   {
-    title: '자동 제어 및 작업 로그',
-    desc: '관수, 환기, 차광 등 자동화 설비의 동작 이력을 한눈에 볼 수 있습니다.',
+    title: '자동 제어 로그',
+    desc: '관수, 환기 등 자동화 설비의 동작 이력을 보여줍니다.',
     className: 'rightMiddle',
-    feature: 'logs',
   },
   {
     title: 'AI 운영 인사이트',
-    desc: '환경 데이터와 생육 상태를 종합해 운영 추천과 대응 방향을 제안합니다.',
+    desc: '환경과 생육 상태를 종합해 대응 방향을 제안합니다.',
     className: 'rightBottom',
-    feature: 'ai',
   },
 ];
 
+/* -------------------------------------------------------------------------- */
+/* MAIN COMPONENT                                                            */
+/* -------------------------------------------------------------------------- */
+
 const Dashboard = () => {
   const { ref: sectionRef, className: animateClass } = useScrollFadeIn();
-  const [activeFeature, setActiveFeature] = useState(null);
 
   return (
     <DashboardWrap id="dashboard">
@@ -154,50 +143,44 @@ const Dashboard = () => {
           <SectionLabel>Dashboard Showcase</SectionLabel>
           <SectionTitle>AI 대시보드 미리보기</SectionTitle>
           <SectionDesc>
-            실제 스마트팜 통합 관제 화면이 어떤 구조로 구성되는지 한눈에
-            보여주는 예시 화면입니다.
+            Seed Farm의 스마트팜 통합 관제 시스템이 어떻게 구성되는지 한눈에
+            보여주는 예시입니다.
           </SectionDesc>
         </AnimatedBox>
 
-        <AnimatedBox className={animateClass} $delay="0.2s">
-          <DashboardShowcase>
-            {showcaseCards.map((card) => (
-              <FloatingCard
-                key={card.title}
-                className={card.className}
-                $active={activeFeature === card.feature}
-                $hidden={
-                  activeFeature !== null && activeFeature !== card.feature
-                }
-                onMouseEnter={() => setActiveFeature(card.feature)}
-                onMouseLeave={() => setActiveFeature(null)}
+        <DashboardShowcase>
+          {/* 1. 설명창(Floating Cards) 위치 지정 및 애니메이션 */}
+          {showcaseCards.map((card, index) => (
+            <FloatingWrapper key={card.title} className={card.className}>
+              <AnimatedBox
+                className={animateClass}
+                $delay={`${0.2 + index * 0.1}s`}
               >
-                <h4>{card.title}</h4>
-                <p>{card.desc}</p>
-              </FloatingCard>
-            ))}
+                <FloatingCard>
+                  <h4>{card.title}</h4>
+                  <p>{card.desc}</p>
+                </FloatingCard>
+              </AnimatedBox>
+            </FloatingWrapper>
+          ))}
 
+          {/* 2. 메인 대시보드 배경 및 내부 카드 순차 등장 */}
+          <AnimatedBox className={animateClass} $delay="0.1s">
             <DashboardMock>
               <ContentGrid>
                 <LeftColumn>
-                  <FarmSummaryCard
-                    $active={activeFeature === 'alerts'}
-                    $dimmed={
-                      activeFeature !== null && activeFeature !== 'alerts'
-                    }
-                  >
-                    <div className="header-row">
-                      <div>
-                        <WhiteCardTitle>Farm Overview</WhiteCardTitle>
-                        <div className="branch-name">
-                          천안 본점 (Cheonan Hub)
+                  <AnimatedBox className={animateClass} $delay="0.4s">
+                    <FarmSummaryCard>
+                      <div className="header-row">
+                        <div>
+                          <CardTitle>Farm Overview</CardTitle>
+                          <div className="branch-name">
+                            천안 본점 (Cheonan Hub)
+                          </div>
                         </div>
+                        <span className="optimal-badge">Phase: 개화기 🌸</span>
                       </div>
-                      <span className="optimal-badge">Phase: 개화기 🌸</span>
-                    </div>
-
-                    <div className="summary-body">
-                      <div className="main-info">
+                      <div className="summary-body">
                         <div className="score-area">
                           <span className="score">96</span>
                           <span className="label">/ 100 pt</span>
@@ -205,161 +188,134 @@ const Dashboard = () => {
                         <p className="status-text">
                           작물 활력도 최상 (전주 대비 2% ↗)
                         </p>
-                      </div>
-
-                      <div className="metrics-row">
-                        <div className="metric-box">
-                          <span className="m-label">진행중인 이슈</span>
-                          <span className="m-value warning">
-                            ⚠️ 1 건 확인 요망
-                          </span>
-                        </div>
-
-                        <div className="divider"></div>
-
-                        <div className="metric-box">
-                          <span className="m-label">다음 예정 작업</span>
-                          <span className="m-value normal">
-                            자동 방제 (14:00)
-                          </span>
+                        <div className="metrics-row">
+                          <div className="metric-box">
+                            <span className="m-label">진행중인 이슈</span>
+                            <span className="m-value warning">
+                              ⚠️ 1 건 확인 요망
+                            </span>
+                          </div>
+                          <div className="divider" />
+                          <div className="metric-box">
+                            <span className="m-label">다음 예정 작업</span>
+                            <span className="m-value normal">
+                              자동 방제 (14:00)
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </FarmSummaryCard>
+                    </FarmSummaryCard>
+                  </AnimatedBox>
 
-                  <SensorsGroupCard
-                    $active={activeFeature === 'sensors'}
-                    $dimmed={
-                      activeFeature !== null && activeFeature !== 'sensors'
-                    }
-                  >
-                    <CardTitle>Real-time Sensors</CardTitle>
-                    <SensorGrid>
-                      {sensorData.map((sensor, index) => (
-                        <SensorItem key={index}>
-                          <div className="label">{sensor.label}</div>
-
-                          <div className="value-row">
-                            <span className="value">{sensor.value}</span>
-                            <span className="unit">{sensor.unit}</span>
-                          </div>
-
-                          <div className={`trend ${sensor.status}`}>
-                            {sensor.status === 'up'
-                              ? '▲ '
-                              : sensor.status === 'down'
-                                ? '▼ '
-                                : ''}
-                            {sensor.trend}
-                          </div>
-                        </SensorItem>
-                      ))}
-                    </SensorGrid>
-                  </SensorsGroupCard>
+                  <AnimatedBox className={animateClass} $delay="0.5s">
+                    <SensorsGroupCard>
+                      <CardTitle>Real-time Sensors</CardTitle>
+                      <SensorGrid>
+                        {sensorData.map((sensor, idx) => (
+                          <SensorItem key={idx}>
+                            <div className="label">{sensor.label}</div>
+                            <div className="value-row">
+                              <span className="value">{sensor.value}</span>
+                              <span className="unit">{sensor.unit}</span>
+                            </div>
+                            <div className={`trend ${sensor.status}`}>
+                              {sensor.trend}
+                            </div>
+                          </SensorItem>
+                        ))}
+                      </SensorGrid>
+                    </SensorsGroupCard>
+                  </AnimatedBox>
                 </LeftColumn>
 
                 <MiddleColumn>
-                  <LogGroupCard
-                    $active={activeFeature === 'logs'}
-                    $dimmed={activeFeature !== null && activeFeature !== 'logs'}
-                  >
-                    <div className="log-header">
-                      <CardTitle>Device Activity Logs</CardTitle>
-                      <span className="sub-badge system">System Auto</span>
-                    </div>
-
-                    <LogList>
-                      {deviceLogs.map((log) => (
-                        <DeviceLogItem key={log.id} className={log.status}>
-                          <div className="log-top">
-                            <div className="badges">
-                              <span className="sector-badge">{log.sector}</span>
-                              <span className="zone-badge">{log.zone}</span>
+                  <AnimatedBox className={animateClass} $delay="0.6s">
+                    <LogGroupCard>
+                      <div className="log-header">
+                        <CardTitle>Device Activity Logs</CardTitle>
+                        <span className="sub-badge system">System Auto</span>
+                      </div>
+                      <LogList>
+                        {deviceLogs.map((log) => (
+                          <DeviceLogItem key={log.id}>
+                            <div className="log-top">
+                              <div className="badges">
+                                <span className="sector-badge">
+                                  {log.sector}
+                                </span>
+                              </div>
+                              <span className="time">{log.time}</span>
                             </div>
-                            <span className="time">{log.time}</span>
-                          </div>
-
-                          <div className="log-mid">
-                            <span className="device">{log.device}</span>
-                            <span className={`action ${log.status}`}>
-                              {log.action}
-                            </span>
-                          </div>
-
-                          <div className="log-bot">
+                            <div className="log-mid">
+                              <span className="device">{log.device}</span>
+                              <span className={`action ${log.status}`}>
+                                {log.action}
+                              </span>
+                            </div>
                             <span className="desc">{log.desc}</span>
-                          </div>
-                        </DeviceLogItem>
-                      ))}
-                    </LogList>
-                  </LogGroupCard>
+                          </DeviceLogItem>
+                        ))}
+                      </LogList>
+                    </LogGroupCard>
+                  </AnimatedBox>
                 </MiddleColumn>
 
                 <RightColumn>
-                  <CameraCard
-                    $active={activeFeature === 'vision'}
-                    $dimmed={
-                      activeFeature !== null && activeFeature !== 'vision'
-                    }
-                  >
-                    <div className="header-row">
-                      <CardTitle>Live Feed</CardTitle>
-                      <span className="cam-label">Cam 01 (Sector 01)</span>
-                    </div>
+                  <AnimatedBox className={animateClass} $delay="0.7s">
+                    <CameraCard>
+                      <div className="header-row">
+                        <CardTitle>Live Feed</CardTitle>
+                        <span className="cam-label">Cam 01</span>
+                      </div>
+                      <div className="placeholder-content">
+                        <div className="pulse-ring" />
+                        <span className="icon">📹</span>
+                        <span className="text">Streaming...</span>
+                      </div>
+                    </CameraCard>
+                  </AnimatedBox>
 
-                    <div className="placeholder-content">
-                      <div className="pulse-ring"></div>
-                      <span className="icon">📹</span>
-                      <span className="text">Connecting to Stream...</span>
-                    </div>
-                  </CameraCard>
-
-                  <GrowthCard
-                    $active={activeFeature === 'vision'}
-                    $dimmed={
-                      activeFeature !== null && activeFeature !== 'vision'
-                    }
-                  >
-                    <CardTitle>Crop Status</CardTitle>
-                    <GrowthGrid>
-                      {growthData.map((item, index) => (
-                        <div className="g-item" key={index}>
-                          <span className="l">{item.label}</span>
-                          <span className="v">{item.value}</span>
-                        </div>
-                      ))}
-                    </GrowthGrid>
-                  </GrowthCard>
-
-                  <AILogGroupCard
-                    $active={activeFeature === 'ai'}
-                    $dimmed={activeFeature !== null && activeFeature !== 'ai'}
-                  >
-                    <div className="log-header">
-                      <CardTitle>AI Insights</CardTitle>
-                      <span className="sub-badge ai">AI Active</span>
-                    </div>
-
-                    <AILogList>
-                      {aiLogs.map((log, index) => (
-                        <AILogItem key={index} className={log.status}>
-                          <div className="top-row">
-                            <span className="badge">
-                              {log.status === 'action' ? '추천' : '경고'}
-                            </span>
-                            <span className="time">{log.time}</span>
+                  <AnimatedBox className={animateClass} $delay="0.8s">
+                    <GrowthCard>
+                      <CardTitle>Crop Status</CardTitle>
+                      <GrowthGrid>
+                        {growthData.map((item, idx) => (
+                          <div className="g-item" key={idx}>
+                            <span className="l">{item.label}</span>
+                            <span className="v">{item.value}</span>
                           </div>
-                          <div className="title">{log.title}</div>
-                          <div className="desc">{log.desc}</div>
-                        </AILogItem>
-                      ))}
-                    </AILogList>
-                  </AILogGroupCard>
+                        ))}
+                      </GrowthGrid>
+                    </GrowthCard>
+                  </AnimatedBox>
+
+                  <AnimatedBox className={animateClass} $delay="0.9s">
+                    <AILogGroupCard>
+                      <div className="log-header">
+                        <CardTitle>AI Insights</CardTitle>
+                        <span className="sub-badge ai">AI Active</span>
+                      </div>
+                      <AILogList>
+                        {aiLogs.map((log, idx) => (
+                          <AILogItem key={idx} className={log.status}>
+                            <div className="top-row">
+                              <span className="badge">
+                                {log.status === 'action' ? '추천' : '경고'}
+                              </span>
+                              <span className="time">{log.time}</span>
+                            </div>
+                            <div className="title">{log.title}</div>
+                            <div className="desc">{log.desc}</div>
+                          </AILogItem>
+                        ))}
+                      </AILogList>
+                    </AILogGroupCard>
+                  </AnimatedBox>
                 </RightColumn>
               </ContentGrid>
             </DashboardMock>
-          </DashboardShowcase>
-        </AnimatedBox>
+          </AnimatedBox>
+        </DashboardShowcase>
       </Container>
     </DashboardWrap>
   );
@@ -367,630 +323,240 @@ const Dashboard = () => {
 
 export default Dashboard;
 
+/* -------------------------------------------------------------------------- */
+/* STYLED COMPONENTS (Stripe Style)                                           */
+/* -------------------------------------------------------------------------- */
+
 const DashboardWrap = styled(Section)`
-  color: #0f172a;
+  color: #1a1f36;
 `;
 
 const DashboardShowcase = styled.div`
   position: relative;
-  margin-top: 8px;
-  padding-top: 34px;
+  margin-top: 40px;
+  /* 설명창이 화면 밖으로 나가지 않도록 여백 확보 */
+  padding: 20px 40px;
+
+  @media (max-width: 1280px) {
+    padding: 0;
+  }
 `;
 
 const DashboardMock = styled.div`
-  margin-top: 8px;
-  background: linear-gradient(180deg, #f8fafc 0%, #eef5f1 100%);
-  border: 1px solid rgba(15, 23, 42, 0.06);
-  border-radius: 32px;
-  padding: 28px;
+  background: #f6f9fc;
+  border: 1px solid #e6ebf1;
+  border-radius: 12px;
+  padding: 32px;
   box-shadow:
-    0 10px 30px rgba(15, 23, 42, 0.06),
-    0 24px 60px rgba(15, 23, 42, 0.08);
-  transition: box-shadow 0.28s ease;
+    0 50px 100px -20px rgba(50, 50, 93, 0.08),
+    0 30px 60px -30px rgba(0, 0, 0, 0.1);
 
   @media (max-width: 768px) {
-    padding: 18px;
-    border-radius: 24px;
+    padding: 16px;
   }
-`;
-
-const FloatingCard = styled.div`
-  position: absolute;
-  z-index: ${({ $active }) => ($active ? 8 : 4)};
-  width: 280px;
-  min-height: 132px;
-  display: ${({ $hidden }) => ($hidden ? 'none' : 'block')};
-
-  background: rgba(255, 255, 255, 0.97);
-  border: ${({ $active }) =>
-    $active
-      ? '2px dashed rgba(16, 185, 129, 0.6)'
-      : '1px solid rgba(203, 213, 225, 0.85)'};
-  border-radius: 18px;
-  padding: 18px;
-  box-shadow: ${({ $active }) =>
-    $active
-      ? '0 18px 40px rgba(16, 185, 129, 0.16), 0 24px 50px rgba(15, 23, 42, 0.10)'
-      : '0 10px 25px rgba(15, 23, 42, 0.08), 0 24px 50px rgba(15, 23, 42, 0.08)'};
-
-  transform: ${({ $active }) => ($active ? 'translateY(-4px)' : 'none')};
-  transition:
-    transform 0.22s ease,
-    box-shadow 0.22s ease,
-    border 0.22s ease;
-
-  h4 {
-    font-size: 16px;
-    font-weight: 800;
-    color: #0f172a;
-    margin-bottom: 8px;
-    letter-spacing: -0.02em;
-  }
-
-  p {
-    font-size: 13px;
-    line-height: 1.6;
-    color: #475569;
-    margin: 0;
-  }
-
-  &.leftTop {
-    top: -16px;
-    left: -18px;
-  }
-
-  &.leftBottom {
-    top: 278px;
-    left: -36px;
-  }
-
-  &.rightTop {
-    top: -26px;
-    right: -8px;
-  }
-
-  &.rightMiddle {
-    top: 196px;
-    right: -34px;
-  }
-
-  &.rightBottom {
-    top: 396px;
-    right: 6px;
-  }
-
-  @media (max-width: 1280px) {
-    position: static;
-    width: 100%;
-    min-height: auto;
-    display: block;
-    margin-bottom: 16px;
-  }
-`;
-
-const BaseCard = styled.div`
-  background: #ffffff;
-  border-radius: 20px;
-  padding: 1.5em;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  border: 1px solid rgba(226, 232, 240, 0.85);
-
-  outline: ${({ $active }) =>
-    $active ? '2px dashed rgba(16, 185, 129, 0.7)' : 'none'};
-  outline-offset: 4px;
-
-  transition:
-    opacity 0.28s ease,
-    filter 0.28s ease,
-    transform 0.28s ease,
-    box-shadow 0.28s ease,
-    outline 0.28s ease;
-
-  opacity: ${({ $dimmed }) => ($dimmed ? 0.28 : 1)};
-  filter: ${({ $dimmed }) =>
-    $dimmed ? 'grayscale(0.18) brightness(0.94)' : 'none'};
-  transform: ${({ $active }) => ($active ? 'translateY(-4px)' : 'none')};
-
-  box-shadow: ${({ $active }) =>
-    $active
-      ? '0 12px 28px rgba(16, 185, 129, 0.16), 0 18px 40px rgba(15, 23, 42, 0.08)'
-      : '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 10px 15px -3px rgba(0, 0, 0, 0.04)'};
-`;
-
-const CardTitle = styled.h3`
-  font-size: 1.1em;
-  font-weight: 800;
-  color: #0f172a;
-  margin: 0 0 1.2em 0;
-  letter-spacing: -0.02em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
-
-const WhiteCardTitle = styled.h3`
-  font-size: 1.1em;
-  font-weight: 800;
-  color: #ffffff;
-  margin: 0 0 0.2em 0;
-  letter-spacing: -0.02em;
 `;
 
 const ContentGrid = styled.div`
-  flex: 1;
   display: grid;
   grid-template-columns: 2fr 1.5fr 1.2fr;
   gap: 1.5em;
-  width: 100%;
-  min-height: 0;
 
   @media (max-width: 1180px) {
     grid-template-columns: 1fr 1fr;
-
     & > div:nth-child(3) {
       grid-column: 1 / 3;
       flex-direction: row;
     }
   }
-
   @media (max-width: 768px) {
     display: flex;
     flex-direction: column;
-
-    & > div:nth-child(3) {
-      flex-direction: column;
-    }
   }
 `;
 
+const BaseCard = styled.div`
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 1.5em;
+  border: 1px solid #e6ebf1;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+`;
+
+const CardTitle = styled.h3`
+  font-size: 0.95em;
+  font-weight: 600;
+  color: #1a1f36;
+  margin: 0 0 1em 0;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+`;
+
+/* Columns */
 const LeftColumn = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.5em;
-  min-height: 0;
-  min-width: 0;
 `;
-
 const MiddleColumn = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.5em;
-  min-height: 0;
-  min-width: 0;
 `;
-
 const RightColumn = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.5em;
-  min-height: 0;
-  min-width: 0;
 `;
 
+/* Individual Cards */
 const FarmSummaryCard = styled(BaseCard)`
-  flex: 1;
-  min-height: 220px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.3);
-  color: #ffffff;
-
-  .header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
   .branch-name {
-    font-size: 0.85em;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.8);
-  }
-
-  .optimal-badge {
-    background: rgba(255, 255, 255, 0.2);
-    padding: 6px 12px;
-    border-radius: 20px;
     font-size: 0.8em;
-    font-weight: 800;
-    white-space: nowrap;
+    color: #697386;
+    margin-top: 4px;
   }
-
-  .summary-body {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    flex: 1;
-    margin-top: 1em;
+  .optimal-badge {
+    background: #e3fbed;
+    color: #0d7f52;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: 600;
   }
-
-  .score-area {
-    display: flex;
-    align-items: baseline;
-  }
-
   .score {
-    font-size: 3.5rem;
-    font-weight: 800;
-    line-height: 1;
-    letter-spacing: -0.03em;
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: #1a1f36;
   }
-
-  .label {
-    font-size: 0.9rem;
-    margin-left: 6px;
-    color: rgba(255, 255, 255, 0.8);
-    font-weight: 600;
-  }
-
-  .status-text {
-    margin: 0.5em 0 0 0;
-    font-size: 0.9em;
-    color: rgba(255, 255, 255, 0.92);
-    font-weight: 600;
-  }
-
   .metrics-row {
     display: flex;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.15);
-    padding: 1em;
-    border-radius: 16px;
-    margin-top: 1em;
+    background: #f6f9fc;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 16px;
+    border: 1px solid #e6ebf1;
   }
-
   .divider {
     width: 1px;
-    height: 30px;
-    background: rgba(255, 255, 255, 0.2);
-    margin: 0 1em;
-    flex-shrink: 0;
+    background: #e6ebf1;
+    margin: 0 16px;
   }
-
-  .metric-box {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4em;
-    flex: 1;
-    min-width: 0;
-  }
-
   .m-label {
-    font-size: 0.75em;
-    color: rgba(255, 255, 255, 0.8);
-    font-weight: 700;
+    font-size: 0.7em;
+    color: #697386;
+    font-weight: 600;
   }
-
   .m-value {
-    font-size: 1em;
-    font-weight: 800;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 0.9em;
+    font-weight: 600;
   }
-
   .m-value.warning {
-    color: #fecaca;
-  }
-
-  @media (max-width: 640px) {
-    .header-row,
-    .metrics-row {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .divider {
-      display: none;
-    }
+    color: #d92d20;
   }
 `;
 
-const SensorsGroupCard = styled(BaseCard)`
-  flex: 1.2;
-  min-height: 0;
-`;
-
+const SensorsGroupCard = styled(BaseCard)``;
 const SensorGrid = styled.div`
-  flex: 1;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1em;
-
-  @media (max-width: 640px) {
-    grid-template-columns: 1fr;
-  }
+  gap: 10px;
 `;
-
 const SensorItem = styled.div`
-  background-color: rgba(241, 245, 249, 0.8);
-  border-radius: 16px;
-  padding: 1.2em;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
-  min-width: 0;
-  transition:
-    background 0.3s ease,
-    transform 0.3s ease;
-
-  &:hover {
-    background-color: #f8fafc;
-    transform: translateY(-2px);
-  }
-
+  background: #f8fafc;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #e6ebf1;
   .label {
-    font-size: 0.75em;
-    font-weight: 800;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-size: 0.65em;
+    color: #697386;
+    font-weight: 600;
   }
-
-  .value-row {
-    display: flex;
-    align-items: baseline;
-    gap: 4px;
-    margin-top: 0.2em;
-  }
-
   .value {
-    font-size: 1.6em;
-    font-weight: 800;
-    color: #0f172a;
-    letter-spacing: -0.02em;
-  }
-
-  .unit {
-    font-size: 0.8em;
+    font-size: 1.2em;
     font-weight: 700;
-    color: #94a3b8;
   }
-
   .trend {
-    font-size: 0.75em;
-    font-weight: 800;
-    margin-top: 1em;
-    padding: 4px 10px;
-    border-radius: 20px;
-    white-space: nowrap;
+    font-size: 0.7em;
+    margin-top: 8px;
+    font-weight: 600;
   }
-
   .trend.up {
-    color: #ef4444;
-    background: rgba(239, 68, 68, 0.1);
+    color: #d92d20;
   }
-
   .trend.down {
-    color: #3b82f6;
-    background: rgba(59, 130, 246, 0.1);
+    color: #0055ff;
   }
-
   .trend.stable {
-    color: #10b981;
-    background: rgba(16, 185, 129, 0.1);
+    color: #0d7f52;
   }
 `;
 
 const LogGroupCard = styled(BaseCard)`
-  flex: 1;
-  min-height: 0;
-
-  .log-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1em;
-    gap: 10px;
-  }
-
   .sub-badge {
     font-size: 0.7em;
-    font-weight: 800;
-    padding: 4px 10px;
-    border-radius: 20px;
-    white-space: nowrap;
-  }
-
-  .sub-badge.system {
-    background: #f1f5f9;
-    color: #475569;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #f3f6f8;
+    color: #3c4257;
+    border: 1px solid #e6ebf1;
   }
 `;
-
 const LogList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1em;
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding-right: 0.5em;
-
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #e2e8f0;
-    border-radius: 4px;
-  }
+  gap: 12px;
 `;
-
 const DeviceLogItem = styled.div`
-  background: #f8fafc;
-  border-radius: 16px;
-  padding: 1.2em 1.5em;
-  display: flex;
-  flex-direction: column;
-  gap: 0.8em;
-  min-width: 0;
-  transition:
-    transform 0.2s ease,
-    background 0.2s ease;
-  border-left: 4px solid transparent;
-
-  &:hover {
-    background: #ffffff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-    transform: translateY(-2px);
-  }
-
-  &.active {
-    border-left-color: #10b981;
-    background: rgba(16, 185, 129, 0.03);
-  }
-
-  &.done {
-    border-left-color: #94a3b8;
-  }
-
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f6f9fc;
   .log-top {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .badges {
-    display: flex;
-    gap: 0.5em;
-    flex-wrap: wrap;
-  }
-
-  .sector-badge {
     font-size: 0.75em;
-    font-weight: 800;
-    color: #475569;
-    background: #e2e8f0;
-    padding: 4px 10px;
-    border-radius: 8px;
+    color: #697386;
   }
-
-  .zone-badge {
-    font-size: 0.75em;
-    font-weight: 700;
-    color: #64748b;
-    padding: 4px 0;
-  }
-
-  .time {
-    font-size: 0.8em;
-    font-weight: 800;
-    color: #94a3b8;
-    white-space: nowrap;
-  }
-
   .log-mid {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
-    gap: 12px;
-  }
-
-  .device {
-    font-size: 1.05em;
-    font-weight: 800;
-    color: #0f172a;
-  }
-
-  .action {
-    font-size: 0.9em;
-    font-weight: 800;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .action.active {
-    color: #10b981;
-  }
-
-  .action.done {
-    color: #64748b;
-  }
-
-  .desc {
-    font-size: 0.85em;
+    margin: 4px 0;
     font-weight: 600;
-    color: #64748b;
-    line-height: 1.4;
-    display: block;
   }
-
-  @media (max-width: 640px) {
-    .log-mid {
-      flex-direction: column;
-      align-items: flex-start;
-    }
+  .desc {
+    font-size: 0.8em;
+    color: #697386;
+  }
+  .action.active {
+    color: #0d7f52;
   }
 `;
 
 const CameraCard = styled(BaseCard)`
-  flex: 1.2;
-  min-height: 220px;
-  padding: 1.2em;
-
-  .header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1em;
-    gap: 10px;
-  }
-
   .cam-label {
-    font-size: 0.75em;
-    font-weight: 800;
-    color: #475569;
-    background: #f1f5f9;
-    padding: 4px 10px;
-    border-radius: 8px;
-    flex-shrink: 0;
-    white-space: nowrap;
+    font-size: 0.7em;
+    color: #697386;
   }
-
   .placeholder-content {
-    flex: 1;
-    min-height: 180px;
-    background: #0f172a;
-    border-radius: 16px;
+    height: 150px;
+    background: #1a1f36;
+    border-radius: 6px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #ffffff;
+    color: white;
     position: relative;
     overflow: hidden;
   }
-
-  .icon {
-    font-size: 2.5em;
-    margin-bottom: 8px;
-    z-index: 2;
-    opacity: 0.85;
-  }
-
-  .text {
-    font-size: 0.8em;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    z-index: 2;
-    opacity: 0.8;
-  }
-
   .pulse-ring {
     position: absolute;
-    width: 60px;
-    height: 60px;
+    width: 40px;
+    height: 40px;
+    border: 2px solid #0d7f52;
     border-radius: 50%;
-    border: 2px solid #10b981;
-    animation: radar 2s infinite ease-out;
+    animation: radar 2s infinite;
   }
-
   @keyframes radar {
     0% {
       transform: scale(0.5);
@@ -1003,144 +569,137 @@ const CameraCard = styled(BaseCard)`
   }
 `;
 
-const GrowthCard = styled(BaseCard)`
-  padding: 1.2em;
-`;
-
+const GrowthCard = styled(BaseCard)``;
 const GrowthGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1em;
-
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
   .g-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2em;
     background: #f8fafc;
-    padding: 10px;
-    border-radius: 12px;
-  }
-
-  .l {
-    font-size: 0.7em;
-    font-weight: 800;
-    color: #94a3b8;
-    text-transform: uppercase;
-  }
-
-  .v {
-    font-size: 1.1em;
-    font-weight: 800;
-    color: #0f172a;
+    padding: 8px;
+    border-radius: 4px;
+    .l {
+      font-size: 0.65em;
+      color: #697386;
+    }
+    .v {
+      font-size: 0.9em;
+      font-weight: 600;
+    }
   }
 `;
 
 const AILogGroupCard = styled(BaseCard)`
-  flex: 1.2;
-  min-height: 0;
-  padding: 1.2em;
-
-  .log-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1em;
-    gap: 10px;
-  }
-
-  .sub-badge {
-    font-size: 0.7em;
-    font-weight: 800;
-    padding: 4px 10px;
-    border-radius: 20px;
-    white-space: nowrap;
-  }
-
   .sub-badge.ai {
-    background: rgba(16, 185, 129, 0.1);
-    color: #10b981;
+    background: #f4f6fd;
+    color: #635bff;
+    font-size: 0.7em;
+    padding: 2px 8px;
+    border-radius: 4px;
   }
 `;
-
 const AILogList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.5em;
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding-right: 0.5em;
-
-  &::-webkit-scrollbar {
-    width: 4px;
+  gap: 10px;
+`;
+const AILogItem = styled.div`
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #e6ebf1;
+  &.action {
+    background: #f8fafc;
   }
-
-  &::-webkit-scrollbar-thumb {
-    background: #e2e8f0;
-    border-radius: 4px;
+  &.warning {
+    background: #fff5f5;
+    border-color: #ffe0e0;
+    .badge {
+      color: #d92d20;
+    }
+  }
+  .badge {
+    font-size: 0.65em;
+    font-weight: 700;
+    color: #0d7f52;
+  }
+  .time {
+    font-size: 0.7em;
+    color: #697386;
+  }
+  .title {
+    font-size: 0.85em;
+    font-weight: 600;
+    margin: 4px 0;
+  }
+  .desc {
+    font-size: 0.75em;
+    color: #697386;
+    line-height: 1.4;
   }
 `;
 
-const AILogItem = styled.div`
-  display: flex;
-  flex-direction: column;
-  padding: 1em;
-  border-radius: 12px;
-  margin-bottom: 0.5em;
-  min-width: 0;
-  border-left: 3px solid transparent;
+const FloatingWrapper = styled.div`
+  position: absolute;
+  z-index: 10;
 
-  &.action {
-    background: rgba(16, 185, 129, 0.05);
-    border-left-color: #10b981;
+  &.leftTop {
+    top: -20px;
+    left: -10px;
+  }
+  &.leftBottom {
+    top: 320px;
+    left: -30px;
+  }
+  &.rightTop {
+    top: -30px;
+    right: -10px;
+  }
+  &.rightMiddle {
+    top: 220px;
+    right: -40px;
+  }
+  &.rightBottom {
+    top: 440px;
+    right: 0px;
   }
 
-  &.warning {
-    background: rgba(239, 68, 68, 0.05);
-    border-left-color: #ef4444;
+  /* 반응형 처리: 화면이 작아지면 위로 나열 */
+  @media (max-width: 1280px) {
+    position: relative;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100%;
+    margin-bottom: 12px;
   }
+`;
 
-  .top-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5em;
-    gap: 10px;
-  }
+/* 카드의 순수 디자인만 담당하는 컴포넌트 */
+const FloatingCard = styled.div`
+  width: 260px;
+  background: #ffffff;
+  border: 1px solid #e6ebf1;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow:
+    0 15px 35px rgba(50, 50, 93, 0.1),
+    0 5px 15px rgba(0, 0, 0, 0.07);
 
-  .badge {
-    font-size: 0.7em;
-    font-weight: 900;
-    background: #fff;
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
-
-  &.action .badge {
-    color: #10b981;
-  }
-
-  &.warning .badge {
-    color: #ef4444;
-  }
-
-  .time {
-    font-size: 0.75em;
-    color: #94a3b8;
-    font-weight: 800;
-  }
-
-  .title {
-    font-size: 0.9em;
-    font-weight: 800;
-    color: #0f172a;
-    margin-bottom: 0.3em;
-  }
-
-  .desc {
-    font-size: 0.8em;
-    color: #475569;
-    line-height: 1.4;
+  h4 {
+    font-size: 14px;
     font-weight: 600;
+    color: #1a1f36;
+    margin-bottom: 4px;
+  }
+
+  p {
+    font-size: 12px;
+    line-height: 1.6;
+    color: #697386;
+    margin: 0;
+  }
+
+  @media (max-width: 1280px) {
+    width: 100%;
   }
 `;

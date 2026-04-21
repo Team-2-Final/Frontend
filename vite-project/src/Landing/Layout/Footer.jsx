@@ -72,15 +72,15 @@ const Footer = () => {
           </FooterCol>
 
           <FooterCol>
-            <h4>Quick Links</h4>
-            <FooterLink href="#features">Features</FooterLink>
-            <FooterLink href="#dashboard">Dashboard</FooterLink>
-            <FooterLink href="#usecase">UseCase</FooterLink>
-            <FooterLink href="#contact">Contact</FooterLink>
+            <h4>바로가기</h4>
+            <FooterLink href="#features">핵심 기능</FooterLink>
+            <FooterLink href="#dashboard">대시보드</FooterLink>
+            <FooterLink href="#usecase">활용 사례</FooterLink>
+            <FooterLink href="#contact">문의하기</FooterLink>
           </FooterCol>
 
           <FooterCol>
-            <h4>Contact</h4>
+            <h4>문의</h4>
             <p>010-1234-5678</p>
             <p>seedfarm@gmail.com</p>
             <p>GitHub</p>

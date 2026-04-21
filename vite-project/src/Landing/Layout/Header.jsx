@@ -85,9 +85,9 @@ const Header = () => {
           <Logo>Seed Farm</Logo>
 
           <Nav>
-            <a href="#hero">Hero</a>
-            <a href="#features">Features</a>
-            <a href="#usecase">UseCase</a>
+            <a href="#hero">홈</a>
+            <a href="#features">핵심 기능</a>
+            <a href="#usecase">활용 사례</a>
             <a href="#contact">문의하기</a>
           </Nav>
 
