@@ -4,6 +4,9 @@ import { useOutletContext } from 'react-router-dom';
 import { CardTitle } from './Styles/AdminShared';
 import { getCameraByBranch, FALLBACK_IMAGE } from '../data/cctvData';
 
+const API_BASE = 'http://127.0.0.1:8000/api';
+const WS_BASE = 'ws://127.0.0.1:8000/api/ws/dashboard';
+
 const getGrowthByPercent = (percent, phase) => {
   const standardDB = {
     '육묘기 🌱': { height: 25.0, leaf: 6, length: 5.5, width: 4.5 },
@@ -46,6 +49,12 @@ const getGrowthByPercent = (percent, phase) => {
 
 const DashboardPage = () => {
   const { selectedBranch } = useOutletContext();
+
+  // 우선 테스트용으로 고정
+  const batchId = 2;
+
+  const [serverDashboard, setServerDashboard] = useState(null);
+  const wsRef = useRef(null);
 
   const dashboardData = useMemo(
     () => ({
@@ -364,25 +373,80 @@ const DashboardPage = () => {
     aqi: '보통',
     icon: '🌤️',
   };
+  
+  const loadDashboard = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/dashboard/${batchId}`);
+      const text = await res.text();
+      console.log('dashboard raw', text);
+
+      const json =JSON.parse(text);
+      setServerDashboard(json);
+    } catch (err) {
+      console.error('dashboard 조회 실패', err);
+    }
+  };
+
+   useEffect(() => {
+    loadDashboard();
+  }, [batchId]);
 
   useEffect(() => {
-    setLiveSensors(currentData.sensors);
-    const interval = setInterval(() => {
-      setLiveSensors((prev) =>
-        prev.map((s) => {
-          if (s.label === '내부 온도' || s.label === '내부 습도') {
-            const fluctuate = Math.random() * 0.2 - 0.1;
-            return {
-              ...s,
-              value: Number(parseFloat(s.value) + fluctuate).toFixed(1),
-            };
-          }
-          return s;
-        }),
-      );
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [selectedBranch, currentData]);
+    const ws = new WebSocket(`${WS_BASE}/${batchId}`);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      console.log('dashboard websocket connected');
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        console.log('dashboard ws message:', message);
+
+        if (
+          message.type === 'dashboard_init' ||
+          message.type === 'dashboard_update'
+        ) {
+          setServerDashboard(message.data);
+        }
+      } catch (err) {
+        console.error('dashboard ws parse 실패', err);
+      }
+    };
+
+    ws.onerror = (err) => {
+      console.error('dashboard websocket error', err);
+    };
+
+    ws.onclose = () => {
+      console.log('dashboard websocket closed');
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, [batchId]);
+
+  // mock 실시간 효과라 실제 웹소켓 값이 들어오면 방해됨
+  // useEffect(() => {
+  //   setLiveSensors(currentData.sensors);
+  //   const interval = setInterval(() => {
+  //     setLiveSensors((prev) =>
+  //       prev.map((s) => {
+  //         if (s.label === '내부 온도' || s.label === '내부 습도') {
+  //           const fluctuate = Math.random() * 0.2 - 0.1;
+  //           return {
+  //             ...s,
+  //             value: Number(parseFloat(s.value) + fluctuate).toFixed(1),
+  //           };
+  //         }
+  //         return s;
+  //       }),
+  //     );
+  //   }, 3000);
+  //   return () => clearInterval(interval);
+  // }, [selectedBranch, currentData]);
 
   const aiLogs = [
     {
@@ -414,11 +478,167 @@ const DashboardPage = () => {
     '토양 산도(pH)': { range: '정상 5.5~6.5 pH', updatedAt: '방금 전' },
   };
 
-  const mainSensorCards = liveSensors.map((sensor) => ({
-    ...sensor,
-    range: sensorMetaMap[sensor.label]?.range || '',
-    updatedAt: sensorMetaMap[sensor.label]?.updatedAt || '방금 전',
-  }));
+  const overview = serverDashboard?.overview;
+  const sensors = serverDashboard?.sensors;
+  const cropStatus = serverDashboard?.crop_status;
+  const deviceLogs = serverDashboard?.device_logs || [];
+  const aiReports = serverDashboard?.ai_reports || [];
+
+  const mainSensorCards = sensors
+  ? [
+      {
+        label: '내부 온도',
+        value: sensors.temperature?.value ?? '-',
+        unit: sensors.temperature?.unit ?? '°C',
+        trend:
+          sensors.temperature?.delta == null
+            ? '-'
+            : `${sensors.temperature.delta > 0 ? '+' : ''}${sensors.temperature.delta}`,
+        status:
+          sensors.temperature?.delta > 0
+            ? 'up'
+            : sensors.temperature?.delta < 0
+              ? 'down'
+              : 'stable',
+        range: sensorMetaMap['내부 온도']?.range || '',
+        updatedAt: sensors.recorded_at || '방금 전',
+      },
+      {
+        label: '내부 습도',
+        value: sensors.humidity?.value ?? '-',
+        unit: sensors.humidity?.unit ?? '%',
+        trend:
+          sensors.humidity?.delta == null
+            ? '-'
+            : `${sensors.humidity.delta > 0 ? '+' : ''}${sensors.humidity.delta}`,
+        status:
+          sensors.humidity?.delta > 0
+            ? 'up'
+            : sensors.humidity?.delta < 0
+              ? 'down'
+              : 'stable',
+        range: sensorMetaMap['내부 습도']?.range || '',
+        updatedAt: sensors.recorded_at || '방금 전',
+      },
+      {
+        label: 'CO2 농도',
+        value: sensors.co2?.value ?? '-',
+        unit: sensors.co2?.unit ?? 'ppm',
+        trend:
+          sensors.co2?.delta == null
+            ? '-'
+            : `${sensors.co2.delta > 0 ? '+' : ''}${sensors.co2.delta}`,
+        status:
+          sensors.co2?.delta > 0
+            ? 'up'
+            : sensors.co2?.delta < 0
+              ? 'down'
+              : 'stable',
+        range: sensorMetaMap['CO2 농도']?.range || '',
+        updatedAt: sensors.recorded_at || '방금 전',
+      },
+      {
+        label: '광합성 광량',
+        value: sensors.radiation?.value ?? '-',
+        unit: sensors.radiation?.unit ?? 'W/m²',
+        trend:
+          sensors.radiation?.delta == null
+            ? '-'
+            : `${sensors.radiation.delta > 0 ? '+' : ''}${sensors.radiation.delta}`,
+        status:
+          sensors.radiation?.delta > 0
+            ? 'up'
+            : sensors.radiation?.delta < 0
+              ? 'down'
+              : 'stable',
+        range: sensorMetaMap['광합성 광량']?.range || '',
+        updatedAt: sensors.recorded_at || '방금 전',
+      },
+      {
+        label: '토양 양액 농도(EC)',
+        value: sensors.soil_ec?.value ?? '-',
+        unit: sensors.soil_ec?.unit ?? 'dS/m',
+        trend:
+          sensors.soil_ec?.delta == null
+            ? '-'
+            : `${sensors.soil_ec.delta > 0 ? '+' : ''}${sensors.soil_ec.delta}`,
+        status:
+          sensors.soil_ec?.delta > 0
+            ? 'up'
+            : sensors.soil_ec?.delta < 0
+              ? 'down'
+              : 'stable',
+        range: sensorMetaMap['토양 양액 농도(EC)']?.range || '',
+        updatedAt: sensors.recorded_at || '방금 전',
+      },
+      {
+        label: '토양 산도(pH)',
+        value: sensors.soil_ph?.value ?? '-',
+        unit: sensors.soil_ph?.unit ?? 'pH',
+        trend:
+          sensors.soil_ph?.delta == null
+            ? '-'
+            : `${sensors.soil_ph.delta > 0 ? '+' : ''}${sensors.soil_ph.delta}`,
+        status:
+          sensors.soil_ph?.delta > 0
+            ? 'up'
+            : sensors.soil_ph?.delta < 0
+              ? 'down'
+              : 'stable',
+        range: sensorMetaMap['토양 산도(pH)']?.range || '',
+        updatedAt: sensors.recorded_at || '방금 전',
+      },
+    ]
+  : liveSensors.map((sensor) => ({
+      ...sensor,
+      range: sensorMetaMap[sensor.label]?.range || '',
+      updatedAt: sensorMetaMap[sensor.label]?.updatedAt || '방금 전',
+    }));
+
+    const growthData = cropStatus
+  ? {
+      height: {
+        value: cropStatus.plant_height ?? 0,
+        target: currentData.growth.height.target,
+        unit: 'cm',
+      },
+      leafCount: {
+        value: cropStatus.leaf_count ?? 0,
+        target: currentData.growth.leafCount.target,
+        unit: '개',
+      },
+      leafLength: {
+        value: cropStatus.leaf_length ?? 0,
+        target: currentData.growth.leafLength.target,
+        unit: 'cm',
+      },
+      leafWidth: {
+        value: cropStatus.leaf_width ?? 0,
+        target: currentData.growth.leafWidth.target,
+        unit: 'cm',
+      },
+    }
+  : currentData.growth;
+
+  const dashboardLogs = deviceLogs.length
+  ? deviceLogs.map((log) => ({
+      id: log.id,
+      time: log.time || '-',
+      device: log.device,
+      action: log.mode,
+      desc: log.detail || '',
+      status: log.status === 'issued' ? 'active' : 'done',
+    }))
+  : currentData.logs;
+
+  const dashboardAiLogs = aiReports.length
+  ? aiReports.map((log) => ({
+      time: log.time || '-',
+      status: log.level === '경고' ? 'warning' : 'action',
+      title: log.title,
+      desc: `confidence=${log.confidence ?? '-'} / severity=${log.severity ?? '-'}`,
+    }))
+  : aiLogs;
 
   const renderGrowthItem = (label, data) => {
     const diff = (data.value - data.target).toFixed(1);
@@ -487,28 +707,28 @@ const DashboardPage = () => {
             </div>
             <div className="score-row">
               <div className="score-wrap">
-                <span className="score">{currentData.percent}</span>
+                <span className="score">{overview?.score ?? currentData.percent}</span>
                 <span className="percent">%</span>
               </div>
-              <div className="phase-badge">{currentData.phase}</div>
+              <div className="phase-badge">{overview?.phase ?? currentData.phase}</div>
             </div>
             <div className="progress-track">
               <div
                 className="progress-fill"
-                style={{ width: `${currentData.percent}%` }}
+                style={{ width: `${overview?.score ?? currentData.percent}%` }}
               />
             </div>
-            <div className="status">{currentData.status}</div>
+            <div className="status">{overview?.summary ?? currentData.status}</div>
           </ScoreMiniCard>
         </TopLeftGroup>
 
         <GrowthCard>
           <CardTitle>식물 생육 지표 (AI 편차 분석)</CardTitle>
           <GrowthGrid>
-            {renderGrowthItem('초장 (세로 높이)', currentData.growth.height)}
-            {renderGrowthItem('엽수 (잎 개수)', currentData.growth.leafCount)}
-            {renderGrowthItem('엽장 (잎 길이)', currentData.growth.leafLength)}
-            {renderGrowthItem('엽폭 (잎 너비)', currentData.growth.leafWidth)}
+            {renderGrowthItem('초장 (세로 높이)', growthData.height)}
+            {renderGrowthItem('엽수 (잎 개수)', growthData.leafCount)}
+            {renderGrowthItem('엽장 (잎 길이)', growthData.leafLength)}
+            {renderGrowthItem('엽폭 (잎 너비)', growthData.leafWidth)}
           </GrowthGrid>
         </GrowthCard>
       </TopRow>
@@ -583,7 +803,7 @@ const DashboardPage = () => {
               <CardTitle>장치 작동 이력</CardTitle>
             </div>
             <LogList>
-              {currentData.logs.map((log) => (
+              {dashboardLogs.map((log) => (
                 <DeviceLogItem key={log.id} className={log.status}>
                   <div className="log-top">
                     <div className="badges">
@@ -608,7 +828,7 @@ const DashboardPage = () => {
               <span className="sub-badge ai">AI Active</span>
             </div>
             <AILogList>
-              {aiLogs.map((log, index) => (
+              {dashboardAiLogs.map((log, index) => (
                 <AILogItem key={index} className={log.status}>
                   <div className="top-row">
                     <span className="badge">
