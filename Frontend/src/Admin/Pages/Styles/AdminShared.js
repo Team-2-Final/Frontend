@@ -42,14 +42,14 @@ export const PageContainer = styled.div`
 /** * Flex: 배치를 위한 만능 도구 (이것만 쓰면 display:flex 칠 필요 없음) */
 export const Flex = styled.div`
   display: flex;
-  flex-direction: ${({ dir = 'row' }) => dir};
-  justify-content: ${({ justify = 'flex-start' }) => justify};
-  align-items: ${({ align = 'stretch' }) => align};
-  gap: ${({ gap = '0' }) => gap};
-  flex: ${({ flex }) => flex || 'none'};
-  width: ${({ width }) => width || 'auto'};
-  padding: ${({ p = '0' }) => p};
-  margin: ${({ m = '0' }) => m};
+  flex-direction: ${({ $dir = 'row' }) => $dir};
+  justify-content: ${({ $justify = 'flex-start' }) => $justify};
+  align-items: ${({ $align = 'stretch' }) => $align};
+  gap: ${({ $gap = '0' }) => $gap};
+  flex: ${({ $flex }) => $flex || 'none'};
+  width: ${({ $width }) => $width || 'auto'};
+  padding: ${({ $p = '0' }) => $p};
+  margin: ${({ $m = '0' }) => $m};
 `;
 
 /** * MainWrapper: 우측 컨텐츠 영역의 표준 규격 */
