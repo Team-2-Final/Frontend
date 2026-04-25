@@ -7,28 +7,34 @@ import client from '../../api/client';
 const DataAnalysisPage = () => {
   const { selectedBranch } = useOutletContext();
   const [selectedBatch, setSelectedBatch] = useState('');
-  const [timeRange, setTimeRange] = useState('week');
+  const [timeRange, setTimeRange] = useState('day');
   const [batchList, setBatchList] = useState([]);
   const [rawData, setRawData] = useState(null);
   const [statsData, setStatsData] = useState([]);
+  const [hoverInfo, setHoverInfo] = useState(null);
 
   // 1. 작기 목록 불러오기
   useEffect(() => {
     const fetchBatches = async () => {
       try {
         const res = await client.get('/analysis/growth-batch');
+
         const formattedList = res.data.map((b, idx) => ({
           id: b.id,
           name: `${b.description} (${b.crop_type})`,
-          // 초기 데이터 로드 시 첫 번째 작기만 진행중으로 설정
           status: idx === 0 ? '진행중' : '종료됨',
         }));
+
         setBatchList(formattedList);
-        if (formattedList.length > 0) setSelectedBatch(formattedList[0].id);
+
+        if (formattedList.length > 0) {
+          setSelectedBatch(formattedList[0].id);
+        }
       } catch (error) {
         console.error('작기 목록 로드 실패:', error);
       }
     };
+
     fetchBatches();
   }, []);
 
@@ -44,10 +50,11 @@ const DataAnalysisPage = () => {
 
         // 👉 프론트 그래프에 맞게 변환
         const formatted = res.data.map((d) => ({
-          temp: d.temperature,
-          extTemp: d.temperature - 2, // 임시 (외부온도 없으니까)
-          height: 50, // 임시 (나중에 plant_growth 연결)
-          stdHeight: 60,
+          label: d.label || d.created_at || d.date,
+          temp: d.temperature ?? null,
+          extTemp: d.external_temperature ?? null,
+          height: d.plant_height ?? null,
+          stdHeight: d.standard_height ?? null,
         }));
 
         setStatsData(formatted);
@@ -64,6 +71,7 @@ const DataAnalysisPage = () => {
     const fetchDashboard = async () => {
       try {
         const res = await client.get(`/analysis/dashboard/${selectedBatch}`);
+        console.log('🔥 데이터페이지 API 응답:', res.data);
         setRawData(res.data);
       } catch (error) {
         console.error('❌ dashboard 에러', error);
@@ -72,6 +80,11 @@ const DataAnalysisPage = () => {
 
     fetchDashboard();
   }, [selectedBatch]);
+
+  // timeRange 변경 시 offset 초기화
+  const handleSetTimeRange = (r) => {
+    setTimeRange(r);
+  };
 
   // 동별 가중치 (기존 유지)
   const branchModifiers = {
@@ -87,7 +100,6 @@ const DataAnalysisPage = () => {
       temp: 0,
       leaf: 1.0,
     };
-
     const safeData = {
       avgTemp: rawData.sensors?.temperature?.value || 0,
       avgHumid: rawData.sensors?.humidity?.value || 0,
@@ -98,15 +110,65 @@ const DataAnalysisPage = () => {
       growthDelta: rawData.growthDelta || { day: 0, week: 0, month: 0 },
     };
 
-    safeData.currentHeight = (safeData.currentHeight * modifier.height).toFixed(
-      1,
-    );
+    // growthDelta를 % 증가율로 변환 (평균 키 대비) — 실제 API 데이터만 사용
+    const currentHeight = Number(safeData.currentHeight) || 1;
+
+    safeData.growthPct = {
+      day:
+        rawData.growthDelta?.day != null
+          ? +((rawData.growthDelta.day / currentHeight) * 100).toFixed(1)
+          : null,
+      week:
+        rawData.growthDelta?.week != null
+          ? +((rawData.growthDelta.week / currentHeight) * 100).toFixed(1)
+          : null,
+      month:
+        rawData.growthDelta?.month != null
+          ? +((rawData.growthDelta.month / currentHeight) * 100).toFixed(1)
+          : null,
+    };
+
+    safeData.currentHeight = Number(safeData.currentHeight).toFixed(1);
     safeData.avgTemp = (parseFloat(safeData.avgTemp) + modifier.temp).toFixed(
       1,
     );
 
     return safeData;
   }, [rawData, selectedBranch]);
+  console.log('데이터페이지 height:', currentData?.currentHeight);
+  console.log('데이터페이지 growthDelta:', rawData?.growthDelta);
+  const activeChartData = statsData || [];
+
+  const xLabels = useMemo(() => {
+    return activeChartData.map((d, i) => d.label || `${i + 1}`);
+  }, [activeChartData]);
+
+  const visibleXLabels = useMemo(() => {
+    if (timeRange === 'month') {
+      return xLabels.map((label, i) => {
+        if (i === 0) return null;
+        return i % 7 === 0 ? label : null;
+      });
+    }
+
+    if (timeRange === 'all') {
+      return xLabels.map((label, i) => {
+        if (i === 0) return null;
+
+        const currentMonth = label?.slice(0, 7);
+        const prevMonth = xLabels[i - 1]?.slice(0, 7);
+
+        return currentMonth !== prevMonth ? label : null;
+      });
+    }
+
+    return xLabels;
+  }, [xLabels, timeRange]);
+
+  const heightDiff = currentData
+    ? (currentData.currentHeight - currentData.targetHeight).toFixed(1)
+    : 0;
+  const isNormal = heightDiff >= -1.0;
 
   // 🚨 현재 선택된 작기의 상태를 실시간으로 확인
   const currentBatchStatus = useMemo(() => {
@@ -143,43 +205,88 @@ const DataAnalysisPage = () => {
     }
   };
 
-  const activeChartData = statsData || [];
-  const heightDiff = currentData
-    ? (currentData.currentHeight - currentData.targetHeight).toFixed(1)
-    : 0;
-  const isNormal = heightDiff >= -1.0;
+  const maxTemp = 40;
+  const minTemp = 0;
+  const maxHeight = 120;
+  const minHeight = 0;
 
-  const maxTemp = 40,
-    minTemp = 0,
-    maxHeight = 100,
-    minHeight = 0;
-  const getX = (index, total) => (total > 1 ? (index / (total - 1)) * 100 : 0);
-  const getY = (val, max, min = 0) => 90 - ((val - min) / (max - min)) * 80;
+  const getX = (index, total) => {
+    if (total <= 1) return 0;
+    return (index / (total - 1)) * 100;
+  };
 
-  const tempPoints = activeChartData
-    .map(
-      (d, i) =>
-        `${getX(i, activeChartData.length)},${getY(d.temp, maxTemp, minTemp)}`,
-    )
-    .join(' ');
-  const extTempPoints = activeChartData
-    .map(
-      (d, i) =>
-        `${getX(i, activeChartData.length)},${getY(d.extTemp, maxTemp, minTemp)}`,
-    )
-    .join(' ');
-  const heightPoints = activeChartData
-    .map(
-      (d, i) =>
-        `${getX(i, activeChartData.length)},${getY(d.height, maxHeight, minHeight)}`,
-    )
-    .join(' ');
-  const stdHeightPoints = activeChartData
-    .map(
-      (d, i) =>
-        `${getX(i, activeChartData.length)},${getY(d.stdHeight, maxHeight, minHeight)}`,
-    )
-    .join(' ');
+  const getY = (val, max, min = 0) => {
+    if (val == null || Number.isNaN(Number(val))) return null;
+    return 90 - ((Number(val) - min) / (max - min)) * 80;
+  };
+
+  const makeSmoothPath = (data, key, max, min) => {
+    const valid = data
+      .map((d, i) => ({
+        x: getX(i, data.length),
+        y: getY(d[key], max, min),
+      }))
+      .filter((p) => p.y !== null);
+
+    if (valid.length === 0) return '';
+    if (valid.length === 1) return `M ${valid[0].x} ${valid[0].y}`;
+
+    return valid
+      .map((p, i) => {
+        if (i === 0) return `M ${p.x} ${p.y}`;
+        const prev = valid[i - 1];
+        const midX = (prev.x + p.x) / 2;
+        return `Q ${prev.x} ${prev.y}, ${midX} ${(prev.y + p.y) / 2} T ${p.x} ${p.y}`;
+      })
+      .join(' ');
+  };
+
+  const tempPath = makeSmoothPath(activeChartData, 'temp', maxTemp, minTemp);
+  const extTempPath = makeSmoothPath(
+    activeChartData,
+    'extTemp',
+    maxTemp,
+    minTemp,
+  );
+  const heightPath = makeSmoothPath(
+    activeChartData,
+    'height',
+    maxHeight,
+    minHeight,
+  );
+  const stdHeightPath = makeSmoothPath(
+    activeChartData,
+    'stdHeight',
+    maxHeight,
+    minHeight,
+  );
+
+  const getHoverPoint = (chartType, index) => {
+    const row = activeChartData[index];
+    if (!row) return null;
+
+    if (chartType === 'temp') {
+      return {
+        x: getX(index, activeChartData.length),
+        y: getY(row.temp, maxTemp, minTemp),
+        title: xLabels[index],
+        mainLabel: '내부 온도',
+        mainValue: row.temp != null ? `${row.temp}°C` : '데이터 없음',
+        subLabel: '외부 온도',
+        subValue: row.extTemp != null ? `${row.extTemp}°C` : '데이터 없음',
+      };
+    }
+
+    return {
+      x: getX(index, activeChartData.length),
+      y: getY(row.height, maxHeight, minHeight),
+      title: xLabels[index],
+      mainLabel: '평균 초장',
+      mainValue: row.height != null ? `${row.height}cm` : '데이터 없음',
+      subLabel: '목표 기준',
+      subValue: row.stdHeight != null ? `${row.stdHeight}cm` : '90cm',
+    };
+  };
 
   if (!rawData) {
     return (
@@ -313,123 +420,382 @@ const DataAnalysisPage = () => {
         </KpiRow>
 
         <AnalyticsCard>
+          {/* ── 헤더 ── */}
           <div className="analytics-header">
             <CardTitle>AI 생육 종합 분석</CardTitle>
-            <div className="toggle-bg">
-              {['day', 'week', 'month'].map((r) => (
-                <button
-                  key={r}
-                  className={timeRange === r ? 'active' : ''}
-                  onClick={() => setTimeRange(r)}
-                >
-                  {r === 'day' ? '1일' : r === 'week' ? '1주' : '1개월'}
-                </button>
-              ))}
+            <div className="header-controls">
+              {/* 기간 탭 — 1일일 때 시간단위 인라인 표시 */}
+              <div className="toggle-bg">
+                {['day', 'week', 'month', 'all'].map((r) => (
+                  <button
+                    key={r}
+                    className={timeRange === r ? 'active' : ''}
+                    onClick={() => handleSetTimeRange(r)}
+                  >
+                    {r === 'day'
+                      ? '1일'
+                      : r === 'week'
+                        ? '1주'
+                        : r === 'month'
+                          ? '1개월'
+                          : '전체'}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
           <div className="charts-wrapper">
+            {/* ── 온도 차트 ── */}
             <div className="chart-section">
-              <div className="chart-mini-title">내/외부 환경</div>
-              <ChartContainer>
+              <div className="chart-header">
+                <div>
+                  <div className="chart-title">환경 온도 분석</div>
+                  <div className="chart-subtitle">적정 범위 18°C ~ 28°C</div>
+                </div>
+
+                <div className="chart-legend">
+                  <span className="legend-item coral">내부 온도</span>
+                  <span className="legend-item sky">외부 온도</span>
+                  <span className="legend-item danger">상한선</span>
+                  <span className="legend-item safe">하한선</span>
+                </div>
+              </div>
+
+              <ModernChartBox>
                 <YAxis>
                   <span>{maxTemp}°C</span>
+                  <span>{Math.round((maxTemp + minTemp) / 2)}°C</span>
                   <span>{minTemp}°C</span>
                 </YAxis>
-                <GraphArea>
+
+                <GraphArea onMouseLeave={() => setHoverInfo(null)}>
                   <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-                    <polyline
-                      points={extTempPoints}
-                      fill="none"
-                      stroke="#cbd5e1"
-                      strokeWidth="1.5"
-                      strokeDasharray="4"
+                    <rect
+                      x="0"
+                      y={getY(28, maxTemp, minTemp)}
+                      width="100"
+                      height={
+                        getY(18, maxTemp, minTemp) - getY(28, maxTemp, minTemp)
+                      }
+                      fill="#0f766e"
+                      opacity="0.12"
                     />
-                    <polyline
-                      points={tempPoints}
-                      fill="none"
-                      stroke="#10b981"
-                      strokeWidth="2.5"
+
+                    {[10, 30, 50, 70, 90].map((y) => (
+                      <line
+                        key={y}
+                        x1="0"
+                        y1={y}
+                        x2="100"
+                        y2={y}
+                        className="grid-line"
+                      />
+                    ))}
+
+                    <line
+                      x1="0"
+                      y1={getY(28, maxTemp, minTemp)}
+                      x2="100"
+                      y2={getY(28, maxTemp, minTemp)}
+                      className="limit-line danger"
                     />
+
+                    <line
+                      x1="0"
+                      y1={getY(18, maxTemp, minTemp)}
+                      x2="100"
+                      y2={getY(18, maxTemp, minTemp)}
+                      className="limit-line safe"
+                    />
+
+                    <path d={extTempPath} className="chart-line sky dashed" />
+                    <path d={tempPath} className="chart-line coral" />
+
+                    {activeChartData.map((d, i) => {
+                      const point = getHoverPoint('temp', i);
+                      if (!point || point.y === null) return null;
+
+                      const isActive =
+                        hoverInfo?.chart === 'temp' && hoverInfo?.index === i;
+
+                      return (
+                        <g
+                          key={`temp-hover-${i}`}
+                          onMouseEnter={() =>
+                            setHoverInfo({
+                              chart: 'temp',
+                              index: i,
+                              ...point,
+                            })
+                          }
+                        >
+                          <rect
+                            x={Math.max(point.x - 4, 0)}
+                            y="0"
+                            width="8"
+                            height="100"
+                            fill="transparent"
+                          />
+                          {isActive && (
+                            <>
+                              <line
+                                x1={point.x}
+                                y1="0"
+                                x2={point.x}
+                                y2="100"
+                                className="hover-line"
+                              />
+                              <circle
+                                cx={point.x}
+                                cy={point.y}
+                                r="1.8"
+                                className="hover-dot coral"
+                              />
+                            </>
+                          )}
+                        </g>
+                      );
+                    })}
                   </svg>
+
+                  {hoverInfo?.chart === 'temp' && (
+                    <ChartTooltip
+                      style={{
+                        left: `${Math.min(Math.max(hoverInfo.x, 12), 88)}%`,
+                        top: `${Math.min(Math.max(hoverInfo.y, 18), 72)}%`,
+                      }}
+                    >
+                      <div className="tooltip-title">{hoverInfo.title}</div>
+                      <div className="tooltip-row">
+                        <span>{hoverInfo.mainLabel}</span>
+                        <b>{hoverInfo.mainValue}</b>
+                      </div>
+                      <div className="tooltip-row">
+                        <span>{hoverInfo.subLabel}</span>
+                        <b>{hoverInfo.subValue}</b>
+                      </div>
+                    </ChartTooltip>
+                  )}
+
+                  {visibleXLabels.map((label, i) => {
+                    if (!label) return null;
+
+                    return (
+                      <XLabel
+                        key={`temp-label-${i}`}
+                        style={{
+                          left: `${(i / Math.max(xLabels.length - 1, 1)) * 100}%`,
+                        }}
+                      >
+                        {label}
+                      </XLabel>
+                    );
+                  })}
                 </GraphArea>
-              </ChartContainer>
+              </ModernChartBox>
             </div>
 
+            {/* ── 초장 차트 ── */}
             <div className="chart-section">
-              <div className="chart-mini-title">수직 생장 분석</div>
-              <ChartContainer>
+              <div className="chart-header">
+                <div>
+                  <div className="chart-title">생육 초장 분석</div>
+                  <div className="chart-subtitle">목표 기준 90cm</div>
+                </div>
+
+                <div className="chart-legend">
+                  <span className="legend-item mint">평균 초장</span>
+                  <span className="legend-item purple">목표 기준</span>
+                  <span className="legend-item warning">주의 구간</span>
+                </div>
+              </div>
+
+              <ModernChartBox>
                 <YAxis>
                   <span>{maxHeight}cm</span>
+                  <span>{Math.round((maxHeight + minHeight) / 2)}cm</span>
                   <span>{minHeight}cm</span>
                 </YAxis>
-                <GraphArea>
+
+                <GraphArea onMouseLeave={() => setHoverInfo(null)}>
                   <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-                    <polyline
-                      points={stdHeightPoints}
-                      fill="none"
-                      stroke="#94a3b8"
-                      strokeWidth="1.5"
-                      strokeDasharray="4"
+                    <rect
+                      x="0"
+                      y={getY(90, maxHeight, minHeight)}
+                      width="100"
+                      height={
+                        getY(70, maxHeight, minHeight) -
+                        getY(90, maxHeight, minHeight)
+                      }
+                      fill="#16a34a"
+                      opacity="0.1"
                     />
-                    <polyline
-                      points={heightPoints}
-                      fill="none"
-                      stroke="#3b82f6"
-                      strokeWidth="2.5"
+
+                    {[10, 30, 50, 70, 90].map((y) => (
+                      <line
+                        key={y}
+                        x1="0"
+                        y1={y}
+                        x2="100"
+                        y2={y}
+                        className="grid-line"
+                      />
+                    ))}
+
+                    <line
+                      x1="0"
+                      y1={getY(90, maxHeight, minHeight)}
+                      x2="100"
+                      y2={getY(90, maxHeight, minHeight)}
+                      className="limit-line purple"
                     />
+
+                    <line
+                      x1="0"
+                      y1={getY(70, maxHeight, minHeight)}
+                      x2="100"
+                      y2={getY(70, maxHeight, minHeight)}
+                      className="limit-line warning"
+                    />
+
+                    <path
+                      d={stdHeightPath}
+                      className="chart-line purple dashed"
+                    />
+                    <path d={heightPath} className="chart-line mint" />
+
+                    {activeChartData.map((d, i) => {
+                      const point = getHoverPoint('height', i);
+                      if (!point || point.y === null) return null;
+
+                      const isActive =
+                        hoverInfo?.chart === 'height' && hoverInfo?.index === i;
+
+                      return (
+                        <g
+                          key={`height-hover-${i}`}
+                          onMouseEnter={() =>
+                            setHoverInfo({
+                              chart: 'height',
+                              index: i,
+                              ...point,
+                            })
+                          }
+                        >
+                          <rect
+                            x={Math.max(point.x - 4, 0)}
+                            y="0"
+                            width="8"
+                            height="100"
+                            fill="transparent"
+                          />
+
+                          {isActive && (
+                            <>
+                              <line
+                                x1={point.x}
+                                y1="0"
+                                x2={point.x}
+                                y2="100"
+                                className="hover-line"
+                              />
+                              <circle
+                                cx={point.x}
+                                cy={point.y}
+                                r="1.8"
+                                className="hover-dot mint"
+                              />
+                            </>
+                          )}
+                        </g>
+                      );
+                    })}
                   </svg>
+
+                  {hoverInfo?.chart === 'height' && (
+                    <ChartTooltip
+                      style={{
+                        left: `${Math.min(Math.max(hoverInfo.x, 12), 88)}%`,
+                        top: `${Math.min(Math.max(hoverInfo.y, 18), 72)}%`,
+                      }}
+                    >
+                      <div className="tooltip-title">{hoverInfo.title}</div>
+                      <div className="tooltip-row">
+                        <span>{hoverInfo.mainLabel}</span>
+                        <b>{hoverInfo.mainValue}</b>
+                      </div>
+                      <div className="tooltip-row">
+                        <span>{hoverInfo.subLabel}</span>
+                        <b>{hoverInfo.subValue}</b>
+                      </div>
+                    </ChartTooltip>
+                  )}
+
+                  {visibleXLabels.map((label, i) => {
+                    if (!label) return null;
+
+                    return (
+                      <XLabel
+                        key={`temp-label-${i}`}
+                        style={{
+                          left: `${(i / Math.max(xLabels.length - 1, 1)) * 100}%`,
+                        }}
+                      >
+                        {label}
+                      </XLabel>
+                    );
+                  })}
                 </GraphArea>
-              </ChartContainer>
+              </ModernChartBox>
             </div>
 
+            {/* ── 기간별 생장 속도 비교 ── */}
             <div className="chart-section">
-              <div className="chart-mini-title">기간별 생장 속도 비교</div>
+              <div className="chart-mini-title">
+                기간별 생장 속도 비교 (농장 평균 증가율)
+              </div>
               <GrowthBarsContainer>
-                <div className="bar-row">
-                  <span className="time-label">어제 대비</span>
-                  <div className="bar-track">
-                    <div
-                      className="bar-fill day"
-                      style={{
-                        width: `${Math.min((currentData?.growthDelta?.day / 5) * 100, 100)}%`,
-                      }}
-                    />
+                {[
+                  {
+                    key: 'day',
+                    label: '어제 대비',
+                    cls: 'day',
+                    pct: currentData?.growthPct?.day,
+                  },
+                  {
+                    key: 'week',
+                    label: '1주 전 대비',
+                    cls: 'week',
+                    pct: currentData?.growthPct?.week,
+                  },
+                  {
+                    key: 'month',
+                    label: '1개월 전 대비',
+                    cls: 'month',
+                    pct: currentData?.growthPct?.month,
+                  },
+                ].map(({ key, label, cls, pct }) => (
+                  <div className="bar-row" key={key}>
+                    <span className="time-label">{label}</span>
+                    <div className="bar-track">
+                      {pct != null ? (
+                        <div
+                          className={`bar-fill ${cls}`}
+                          style={{ width: `${Math.min(Math.abs(pct), 100)}%` }}
+                        />
+                      ) : (
+                        <div
+                          className="bar-fill no-data"
+                          style={{ width: '100%' }}
+                        />
+                      )}
+                    </div>
+                    <span className="value-label">
+                      {pct != null ? `${pct > 0 ? '+' : ''}${pct}%` : '—'}
+                    </span>
                   </div>
-                  <span className="value-label">
-                    +{currentData?.growthDelta?.day}cm
-                  </span>
-                </div>
-
-                <div className="bar-row">
-                  <span className="time-label">1주 전 대비</span>
-                  <div className="bar-track">
-                    <div
-                      className="bar-fill week"
-                      style={{
-                        width: `${Math.min((currentData?.growthDelta?.week / 15) * 100, 100)}%`,
-                      }}
-                    />
-                  </div>
-                  <span className="value-label">
-                    +{currentData?.growthDelta?.week}cm
-                  </span>
-                </div>
-
-                <div className="bar-row">
-                  <span className="time-label">1개월 전 대비</span>
-                  <div className="bar-track">
-                    <div
-                      className="bar-fill month"
-                      style={{
-                        width: `${Math.min((currentData?.growthDelta?.month / 30) * 100, 100)}%`,
-                      }}
-                    />
-                  </div>
-                  <span className="value-label">
-                    +{currentData?.growthDelta?.month}cm
-                  </span>
-                </div>
+                ))}
               </GrowthBarsContainer>
             </div>
           </div>
@@ -590,12 +956,12 @@ const MiniKpiCard = styled(BaseCard)`
   justify-content: center;
   .label {
     font-size: 0.75em;
-    font-weight: 800;
+    font-weight: 600;
     color: #94a3b8;
   }
   .value {
     font-size: 1.6em;
-    font-weight: 800;
+    font-weight: 700;
     color: #1e293b;
     .unit {
       font-size: 0.6em;
@@ -627,134 +993,381 @@ const AnalyticsCard = styled(BaseCard)`
   flex-direction: column;
   padding: 1.5em;
   min-height: 0;
+  background: #ffffff;
+  box-shadow: none;
+
+  ${CardTitle} {
+    color: #1e293b;
+    margin: 0;
+  }
+
   .analytics-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    .toggle-bg {
-      display: flex;
-      background: #f1f5f9;
-      padding: 4px;
+    margin-bottom: 18px;
+    gap: 12px;
+  }
+
+  .header-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .chart-mini-title {
+    font-size: 0.95em;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 10px;
+  }
+
+  .toggle-bg {
+    display: flex;
+    align-items: center;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 10px;
+    gap: 4px;
+
+    button {
+      min-width: 62px;
+      padding: 7px 14px;
+      border: none;
+      background: transparent;
+      font-size: 0.78em;
+      font-weight: 800;
+      color: #64748b;
+      cursor: pointer;
       border-radius: 8px;
-      button {
-        padding: 6px 14px;
-        border: none;
-        background: transparent;
-        font-size: 0.75em;
-        font-weight: 800;
-        color: #64748b;
-        cursor: pointer;
-        &.active {
-          background: #fff;
-          color: #0f172a;
-          border-radius: 6px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
+
+      &.active {
+        background: #ffffff;
+        color: #0f172a;
       }
     }
   }
+
   .charts-wrapper {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 18px;
     min-height: 0;
+
     .chart-section {
       flex: 1;
       display: flex;
       flex-direction: column;
       min-height: 0;
-      .chart-mini-title {
-        font-size: 0.75em;
-        font-weight: 800;
-        color: #64748b;
-        margin-bottom: 10px;
-      }
+      padding: 4px 0 0;
+      box-shadow: none;
+    }
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    gap: 12px;
+  }
+
+  .chart-title {
+    font-size: 0.95em;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  .chart-subtitle {
+    font-size: 0.7em;
+    font-weight: 500; // 통일
+    color: #94a3b8;
+  }
+
+  .chart-legend {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .legend-item {
+    font-size: 0.66em;
+    font-weight: 600;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+
+    &::before {
+      content: '';
+      width: 14px;
+      height: 3px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    &.coral::before {
+      background: #ef476f;
+    }
+
+    &.sky::before {
+      background: #118ab2;
+    }
+
+    &.mint::before {
+      background: #06d6a0;
+    }
+
+    &.purple::before {
+      background: #7c3aed;
+    }
+
+    &.danger::before {
+      background: #ef4444;
+    }
+
+    &.safe::before {
+      background: #22c55e;
+    }
+
+    &.warning::before {
+      background: #f59e0b;
     }
   }
 `;
-const ChartContainer = styled.div`
+const ModernChartBox = styled.div`
   flex: 1;
   display: flex;
   position: relative;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 12px 8px 22px 0;
+  overflow: visible;
 `;
 const YAxis = styled.div`
-  width: 40px;
+  width: 42px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  border-right: 1px solid #f1f5f9;
+  padding-right: 8px;
+
   span {
-    font-size: 0.6em;
-    font-weight: 800;
-    color: #94a3b8;
+    font-size: 0.64em;
+    font-weight: 600;
+    color: #64748b;
   }
 `;
+
 const GraphArea = styled.div`
   flex: 1;
   position: relative;
-  margin-left: 10px;
+  margin-left: 8px;
+  margin-bottom: 18px;
+
   svg {
     position: absolute;
     width: 100%;
     height: 100%;
     overflow: visible;
   }
+
+  .grid-line {
+    stroke: #e2e8f0;
+    stroke-width: 0.45;
+  }
+
+  .limit-line {
+    stroke-width: 0.75;
+    stroke-dasharray: 5 5;
+    opacity: 0.9;
+
+    &.danger {
+      stroke: #ef4444;
+    }
+
+    &.safe {
+      stroke: #22c55e;
+    }
+
+    &.purple {
+      stroke: #7c3aed;
+    }
+
+    &.warning {
+      stroke: #f59e0b;
+    }
+  }
+
+  .chart-line {
+    fill: none;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+
+    &.coral {
+      stroke: #ef476f;
+    }
+
+    &.sky {
+      stroke: #118ab2;
+    }
+
+    &.mint {
+      stroke: #06d6a0;
+    }
+
+    &.purple {
+      stroke: #7c3aed;
+    }
+
+    &.dashed {
+      stroke-dasharray: 7 6;
+      opacity: 0.75;
+    }
+  }
+
+  .hover-line {
+    stroke: #64748b;
+    stroke-width: 0.65;
+    stroke-dasharray: 4 4;
+    opacity: 0.7;
+  }
+
+  .hover-dot {
+    stroke: #ffffff;
+    stroke-width: 0.9;
+
+    &.coral {
+      fill: #ef476f;
+    }
+
+    &.mint {
+      fill: #06d6a0;
+    }
+  }
 `;
+
 const XLabel = styled.span`
   position: absolute;
-  bottom: -15px;
+  bottom: -17px;
   transform: translateX(-50%);
   font-size: 0.6em;
-  font-weight: 800;
-  color: #94a3b8;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
 `;
 const GrowthBarsContainer = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 15px;
+  gap: 14px;
+
   .bar-row {
     display: flex;
     align-items: center;
     gap: 12px;
+
     .time-label {
-      width: 80px;
-      font-size: 0.8em;
-      font-weight: 800;
+      width: 82px;
+      font-size: 0.75em;
+      font-weight: 700;
       color: #64748b;
       text-align: right;
+      flex-shrink: 0;
     }
+
     .bar-track {
       flex: 1;
-      height: 14px;
+      height: 12px;
       background: #f1f5f9;
-      border-radius: 7px;
+      border-radius: 6px;
       overflow: hidden;
-      position: relative;
+
       .bar-fill {
         height: 100%;
-        border-radius: 7px;
-        transition: width 0.5s ease-out;
+        border-radius: 6px;
+        transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         &.day {
-          background: #38bdf8;
+          background: linear-gradient(90deg, #6ee7b7, #10b981);
         }
         &.week {
-          background: #3b82f6;
+          background: linear-gradient(90deg, #93c5fd, #3b82f6);
         }
         &.month {
-          background: #6366f1; /* 1개월 전 남색 */
+          background: linear-gradient(90deg, #c4b5fd, #6366f1);
+        }
+        &.no-data {
+          background: repeating-linear-gradient(
+            90deg,
+            #e2e8f0 0px,
+            #e2e8f0 6px,
+            transparent 6px,
+            transparent 12px
+          );
+          opacity: 0.5;
         }
       }
     }
+
     .value-label {
-      width: 60px;
-      font-size: 0.85em;
+      width: 52px;
+      font-size: 0.8em;
       font-weight: 800;
       color: #0f172a;
+      flex-shrink: 0;
     }
+  }
+`;
+const ChartTooltip = styled.div`
+  position: absolute;
+  transform: translate(-50%, -110%);
+  min-width: 132px;
+  padding: 10px 12px;
+  background: #ffffff;
+  border-radius: 10px;
+  color: #0f172a;
+  pointer-events: none;
+  z-index: 20;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+
+  .tooltip-title {
+    font-size: 0.72em;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+  }
+
+  .tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    font-size: 0.68em;
+    font-weight: 500;
+    color: #64748b;
+    margin-top: 5px;
+
+    b {
+      color: #0f172a;
+      font-weight: 500;
+    }
+  }
+`;
+const GlobalFont = styled.div`
+  font-family:
+    'Pretendard',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  color: #1e293b;
+
+  * {
+    font-family: inherit;
+    letter-spacing: -0.2px;
   }
 `;
 

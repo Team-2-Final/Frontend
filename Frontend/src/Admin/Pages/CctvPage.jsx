@@ -114,7 +114,7 @@ const CctvPage = () => {
 
   return (
     <ContentGrid>
-      <Flex dir="column" flex="1" style={{ minWidth: 0 }}>
+      <Flex $dir="column" $flex="1" $style={{ minWidth: 0 }}>
         <BaseCard flex="1">
           <CardTitle>현장 카메라 목록</CardTitle>
           <NavContainer>
@@ -157,7 +157,7 @@ const CctvPage = () => {
         </BaseCard>
       </Flex>
 
-      <Flex dir="column" flex="1" style={{ minWidth: 0 }}>
+      <Flex $dir="column" $flex="1" style={{ minWidth: 0 }}>
         <CameraCard>
           <div className="camera-header">
             <div className="title-area">

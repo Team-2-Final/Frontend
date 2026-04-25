@@ -623,6 +623,29 @@ const DashboardPage = () => {
       }
     : currentData.growth;
 
+  const growthDelta = serverDashboard?.growthDelta || {
+    day: 0,
+    week: 0,
+    month: 0,
+  };
+
+  const currentHeight = Number(growthData?.height?.value) || 1;
+
+  const growthPct = {
+    day:
+      growthDelta.day != null
+        ? +((growthDelta.day / currentHeight) * 100).toFixed(1)
+        : null,
+    week:
+      growthDelta.week != null
+        ? +((growthDelta.week / currentHeight) * 100).toFixed(1)
+        : null,
+    month:
+      growthDelta.month != null
+        ? +((growthDelta.month / currentHeight) * 100).toFixed(1)
+        : null,
+  };
+
   const dashboardLogs = deviceLogs.length
     ? deviceLogs.map((log) => ({
         id: log.id,
@@ -836,50 +859,48 @@ const DashboardPage = () => {
               <div className="chart-mini-title">기간별 생장 속도 비교</div>
 
               <GrowthBarsContainer>
-                <div className="bar-row">
-                  <span className="time-label">어제 대비</span>
-                  <div className="bar-track">
-                    <div
-                      className="bar-fill day"
-                      style={{
-                        width: `${Math.min(((currentData?.growthDelta?.day ?? 2.4) / 5) * 100, 100)}%`,
-                      }}
-                    />
-                  </div>
-                  <span className="value-label">
-                    +{currentData?.growthDelta?.day ?? 2.4}cm
-                  </span>
-                </div>
+                {[
+                  {
+                    key: 'day',
+                    label: '어제 대비',
+                    cls: 'day',
+                    pct: growthPct.day,
+                  },
+                  {
+                    key: 'week',
+                    label: '1주 전 대비',
+                    cls: 'week',
+                    pct: growthPct.week,
+                  },
+                  {
+                    key: 'month',
+                    label: '1개월 전 대비',
+                    cls: 'month',
+                    pct: growthPct.month,
+                  },
+                ].map(({ key, label, cls, pct }) => (
+                  <div className="bar-row" key={key}>
+                    <span className="time-label">{label}</span>
 
-                <div className="bar-row">
-                  <span className="time-label">1주 전 대비</span>
-                  <div className="bar-track">
-                    <div
-                      className="bar-fill week"
-                      style={{
-                        width: `${Math.min(((currentData?.growthDelta?.week ?? 8.7) / 15) * 100, 100)}%`,
-                      }}
-                    />
-                  </div>
-                  <span className="value-label">
-                    +{currentData?.growthDelta?.week ?? 8.7}cm
-                  </span>
-                </div>
+                    <div className="bar-track">
+                      {pct != null ? (
+                        <div
+                          className={`bar-fill ${cls}`}
+                          style={{ width: `${Math.min(Math.abs(pct), 100)}%` }}
+                        />
+                      ) : (
+                        <div
+                          className="bar-fill no-data"
+                          style={{ width: '100%' }}
+                        />
+                      )}
+                    </div>
 
-                <div className="bar-row">
-                  <span className="time-label">1개월 전 대비</span>
-                  <div className="bar-track">
-                    <div
-                      className="bar-fill month"
-                      style={{
-                        width: `${Math.min(((currentData?.growthDelta?.month ?? 21.5) / 30) * 100, 100)}%`,
-                      }}
-                    />
+                    <span className="value-label">
+                      {pct != null ? `${pct > 0 ? '+' : ''}${pct}%` : '—'}
+                    </span>
                   </div>
-                  <span className="value-label">
-                    +{currentData?.growthDelta?.month ?? 21.5}cm
-                  </span>
-                </div>
+                ))}
               </GrowthBarsContainer>
             </div>
           </AILogGroupCard>
@@ -1898,6 +1919,16 @@ const GrowthBarsContainer = styled.div`
     &.month {
       background: #6366f1;
     }
+  }
+  &.no-data {
+    background: repeating-linear-gradient(
+      90deg,
+      #e2e8f0 0px,
+      #e2e8f0 6px,
+      transparent 6px,
+      transparent 12px
+    );
+    opacity: 0.5;
   }
 
   .value-label {
