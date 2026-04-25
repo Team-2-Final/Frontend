@@ -457,6 +457,14 @@ const ManualAdjustPanel = styled.section`
   background: #ffffff;
   border-radius: 18px;
   padding: 14px;
+
+  position: sticky;
+  bottom: 12px;
+  z-index: 20;
+
+  box-shadow:
+    0 -6px 18px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(226, 232, 240, 0.9);
 `;
 
 const EmptyText = styled.div`
