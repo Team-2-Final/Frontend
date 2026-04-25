@@ -7,46 +7,6 @@ import { getCameraByBranch, FALLBACK_IMAGE } from '../data/cctvData';
 const API_BASE = 'http://127.0.0.1:8000/api';
 const WS_BASE = 'ws://127.0.0.1:8000/api/ws/dashboard';
 
-const getGrowthByPercent = (percent, phase) => {
-  const standardDB = {
-    '육묘기 🌱': { height: 25.0, leaf: 6, length: 5.5, width: 4.5 },
-    '정식기 🪴': { height: 48.0, leaf: 9, length: 8.0, width: 6.5 },
-    '초기 활착기 🌿': { height: 75.0, leaf: 12, length: 10.5, width: 8.5 },
-    '영양 생장기 🍃': { height: 105.0, leaf: 16, length: 13.0, width: 11.0 },
-    '1화방 개화기 🌼': { height: 135.0, leaf: 19, length: 15.0, width: 12.5 },
-    '2~3화방 개화기 🌸': { height: 165.0, leaf: 22, length: 16.5, width: 13.5 },
-    '과실 비대기 🍏': { height: 195.0, leaf: 25, length: 17.5, width: 14.5 },
-    '첫 수확기 🍅': { height: 225.0, leaf: 28, length: 18.0, width: 15.0 },
-    '연속 수확기 🔄': { height: 260.0, leaf: 30, length: 18.5, width: 15.5 },
-  };
-
-  const target = standardDB[phase] || standardDB['1화방 개화기 🌼'];
-  const ratio = percent / 100;
-
-  return {
-    height: {
-      value: +(target.height * ratio).toFixed(1),
-      target: target.height,
-      unit: 'cm',
-    },
-    leafCount: {
-      value: Math.round(target.leaf * ratio),
-      target: target.leaf,
-      unit: '개',
-    },
-    leafLength: {
-      value: +(target.length * ratio).toFixed(1),
-      target: target.length,
-      unit: 'cm',
-    },
-    leafWidth: {
-      value: +(target.width * ratio).toFixed(1),
-      target: target.width,
-      unit: 'cm',
-    },
-  };
-};
-
 const DashboardPage = () => {
   const { selectedBranch } = useOutletContext();
 
@@ -56,236 +16,13 @@ const DashboardPage = () => {
   const [serverDashboard, setServerDashboard] = useState(null);
   const wsRef = useRef(null);
 
-  const dashboardData = useMemo(
-    () => ({
-      'A동 (표준 생육실)': {
-        percent: 96,
-        phase: '1화방 개화기 🌼',
-        status: '작물 활력도 최상 (전주 대비 2% 상승)',
-        sensors: [
-          {
-            label: '내부 온도',
-            value: 24.2,
-            unit: '°C',
-            trend: '+0.5',
-            status: 'stable',
-          },
-          {
-            label: '내부 습도',
-            value: 65,
-            unit: '%',
-            trend: '-2',
-            status: 'down',
-          },
-          {
-            label: 'CO2 농도',
-            value: 410,
-            unit: 'ppm',
-            trend: '+15',
-            status: 'up',
-          },
-          {
-            label: '광합성 광량',
-            value: 350,
-            unit: 'PPFD',
-            trend: '최적',
-            status: 'stable',
-          },
-          {
-            label: '토양 양액 농도(EC)',
-            value: 1.2,
-            unit: 'dS/m',
-            trend: '유지',
-            status: 'stable',
-          },
-          {
-            label: '토양 산도(pH)',
-            value: 5.8,
-            unit: 'pH',
-            trend: '유지',
-            status: 'stable',
-          },
-        ],
-        growth: getGrowthByPercent(96, '1화방 개화기 🌼'),
-        logs: [
-          {
-            id: 1,
-            time: '14:10',
-            device: '💧 메인 펌프',
-            action: '가동',
-            desc: 'EC 1.2 공급',
-            status: 'active',
-          },
-          {
-            id: 2,
-            time: '13:30',
-            device: '💨 배기팬 2번',
-            action: '2단계',
-            desc: '온도 초과 배기',
-            status: 'active',
-          },
-          {
-            id: 3,
-            time: '11:00',
-            device: '🌤️ 차광 스크린',
-            action: '50% 전개',
-            desc: '일사량 차단',
-            status: 'done',
-          },
-          {
-            id: 4,
-            time: '10:00',
-            device: '💡 LED 보광등',
-            action: '소등',
-            desc: '주간 모드 전환',
-            status: 'done',
-          },
-        ],
-      },
+  const fallbackData = {
+    sensors: [],
+    logs: [],
+    status: '데이터 로딩 중',
+  };
 
-      'B동 (성장 지연실)': {
-        percent: 82,
-        phase: '정식기 🪴',
-        status: '생육 속도 저하 감지, 환경 보정 진행 중',
-        sensors: [
-          {
-            label: '내부 온도',
-            value: 21.4,
-            unit: '°C',
-            trend: '-0.4',
-            status: 'down',
-          },
-          {
-            label: '내부 습도',
-            value: 72,
-            unit: '%',
-            trend: '+3',
-            status: 'up',
-          },
-          {
-            label: 'CO2 농도',
-            value: 380,
-            unit: 'ppm',
-            trend: '-12',
-            status: 'down',
-          },
-          {
-            label: '광합성 광량',
-            value: 240,
-            unit: 'PPFD',
-            trend: '부족',
-            status: 'down',
-          },
-          {
-            label: '토양 양액 농도(EC)',
-            value: 0.9,
-            unit: 'dS/m',
-            trend: '낮음',
-            status: 'down',
-          },
-          {
-            label: '토양 산도(pH)',
-            value: 6.2,
-            unit: 'pH',
-            trend: '유지',
-            status: 'stable',
-          },
-        ],
-        growth: getGrowthByPercent(82, '정식기 🪴'),
-        logs: [
-          {
-            id: 1,
-            time: '14:15',
-            device: '🌡️ 온풍기',
-            action: '대기 모드',
-            desc: '야간 설정 온도 18°C 대기 중',
-            status: 'done',
-          },
-          {
-            id: 2,
-            time: '12:00',
-            device: '💡 LED 보광등',
-            action: '점등 가동',
-            desc: '일조량 부족 감지 -> 광량 보충 실행',
-            status: 'active',
-          },
-        ],
-      },
-
-      'C동 (성장 촉진실)': {
-        percent: 91,
-        phase: '과실 비대기 🍏',
-        status: '촉진 생육 모드 정상 운영 중',
-        sensors: [
-          {
-            label: '내부 온도',
-            value: 25.1,
-            unit: '°C',
-            trend: '+0.3',
-            status: 'stable',
-          },
-          {
-            label: '내부 습도',
-            value: 63,
-            unit: '%',
-            trend: '-1',
-            status: 'stable',
-          },
-          {
-            label: 'CO2 농도',
-            value: 460,
-            unit: 'ppm',
-            trend: '+18',
-            status: 'up',
-          },
-          {
-            label: '광합성 광량',
-            value: 390,
-            unit: 'PPFD',
-            trend: '충분',
-            status: 'stable',
-          },
-          {
-            label: '토양 양액 농도(EC)',
-            value: 1.4,
-            unit: 'dS/m',
-            trend: '유지',
-            status: 'stable',
-          },
-          {
-            label: '토양 산도(pH)',
-            value: 5.7,
-            unit: 'pH',
-            trend: '유지',
-            status: 'stable',
-          },
-        ],
-        growth: getGrowthByPercent(91, '과실 비대기 🍏'),
-        logs: [
-          {
-            id: 1,
-            time: '14:20',
-            device: '💧 관수 밸브',
-            action: '자동 급액',
-            desc: '생육 촉진 레시피 적용',
-            status: 'active',
-          },
-          {
-            id: 2,
-            time: '13:40',
-            device: '💡 LED 보광등',
-            action: '출력 상승',
-            desc: '광량 보강 15% 적용',
-            status: 'active',
-          },
-        ],
-      },
-    }),
-    [],
-  );
-
-  const currentData =
-    dashboardData[selectedBranch] || dashboardData['A동 (표준 생육실)'];
+  const currentData = fallbackData;
   const [liveSensors, setLiveSensors] = useState(currentData.sensors);
 
   const currentCctv = getCameraByBranch(selectedBranch || 'A동 (표준 생육실)');
@@ -366,12 +103,92 @@ const DashboardPage = () => {
     };
   }, []);
 
-  const weatherData = {
-    temp: 15.2,
-    desc: '맑음',
-    humidity: 42,
-    aqi: '보통',
+  const [weatherData, setWeatherData] = useState({
+    temp: '-',
+    desc: '조회 중',
+    humidity: '-',
+    aqi: '실시간',
     icon: '🌤️',
+  });
+  const getBaseDateTime = () => {
+    const now = new Date();
+
+    if (now.getMinutes() < 45) {
+      now.setHours(now.getHours() - 1);
+    }
+
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+
+    return {
+      baseDate: `${yyyy}${mm}${dd}`,
+      baseTime: `${hh}00`,
+    };
+  };
+
+  const getWeatherDesc = (pty, sky) => {
+    if (pty !== '0') {
+      if (pty === '1') return { desc: '비', icon: '🌧️' };
+      if (pty === '2') return { desc: '비/눈', icon: '🌨️' };
+      if (pty === '3') return { desc: '눈', icon: '❄️' };
+      if (pty === '4') return { desc: '소나기', icon: '🌦️' };
+    }
+
+    if (sky === '1') return { desc: '맑음', icon: '☀️' };
+    if (sky === '3') return { desc: '구름 많음', icon: '⛅' };
+    if (sky === '4') return { desc: '흐림', icon: '☁️' };
+
+    return { desc: '관측 중', icon: '🌤️' };
+  };
+
+  const loadWeather = async () => {
+    try {
+      const { baseDate, baseTime } = getBaseDateTime();
+
+      const params = new URLSearchParams({
+        serviceKey: import.meta.env.VITE_KMA_API_KEY,
+        pageNo: '1',
+        numOfRows: '100',
+        dataType: 'JSON',
+        base_date: baseDate,
+        base_time: baseTime,
+        nx: '58',
+        ny: '74',
+      });
+
+      const res = await fetch(
+        `https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst?${params}`,
+      );
+
+      const json = await res.json();
+      const items = json.response?.body?.items?.item || [];
+
+      const getValue = (category) =>
+        items.find((item) => item.category === category)?.obsrValue;
+
+      const temp = getValue('T1H');
+      const humidity = getValue('REH');
+      const pty = getValue('PTY') ?? '0';
+      const sky = getValue('SKY') ?? '1';
+
+      const weather = getWeatherDesc(pty, sky);
+
+      setWeatherData({
+        temp: temp ?? '-',
+        desc: weather.desc,
+        humidity: humidity ?? '-',
+        aqi: '실시간',
+        icon: weather.icon,
+      });
+    } catch (err) {
+      console.error('기상청 날씨 조회 실패:', err);
+      setWeatherData((prev) => ({
+        ...prev,
+        desc: '조회 실패',
+      }));
+    }
   };
 
   const loadDashboard = async () => {
@@ -390,6 +207,19 @@ const DashboardPage = () => {
   useEffect(() => {
     loadDashboard();
   }, [batchId]);
+
+  useEffect(() => {
+    loadWeather();
+
+    const interval = setInterval(
+      () => {
+        loadWeather();
+      },
+      10 * 60 * 1000,
+    );
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const ws = new WebSocket(`${WS_BASE}/${batchId}`);
@@ -486,6 +316,34 @@ const DashboardPage = () => {
   const cropStatus = serverDashboard?.crop_status;
   const deviceLogs = serverDashboard?.device_logs || [];
   const aiReports = serverDashboard?.ai_reports || [];
+
+  const getPhaseByProgress = (percent) => {
+    if (percent < 20) return '🌱';
+    if (percent < 35) return '🪴';
+    if (percent < 50) return '🌿';
+    if (percent < 65) return '🍃';
+    if (percent < 80) return '🌼';
+    if (percent < 90) return '🍏';
+    return '수확 준비기 🍅';
+  };
+
+  const currentScore = overview?.growth_progress ?? 0;
+  const currentPhase = getPhaseByProgress(currentScore);
+
+  const [maxGrowthScore, setMaxGrowthScore] = useState(() => {
+    const saved = localStorage.getItem('maxGrowthScore');
+    return saved ? Number(saved) : currentScore;
+  });
+
+  useEffect(() => {
+    if (currentScore == null) return;
+
+    setMaxGrowthScore((prev) => {
+      const next = Math.max(Number(prev) || 0, Number(currentScore) || 0);
+      localStorage.setItem('maxGrowthScore', String(next));
+      return next;
+    });
+  }, [currentScore]);
 
   const mainSensorCards = sensors
     ? [
@@ -592,36 +450,30 @@ const DashboardPage = () => {
           updatedAt: sensors.recorded_at || '방금 전',
         },
       ]
-    : liveSensors.map((sensor) => ({
-        ...sensor,
-        range: sensorMetaMap[sensor.label]?.range || '',
-        updatedAt: sensorMetaMap[sensor.label]?.updatedAt || '방금 전',
-      }));
+    : [];
 
-  const growthData = cropStatus
-    ? {
-        height: {
-          value: cropStatus.plant_height ?? 0,
-          target: currentData.growth.height.target,
-          unit: 'cm',
-        },
-        leafCount: {
-          value: cropStatus.leaf_count ?? 0,
-          target: currentData.growth.leafCount.target,
-          unit: '개',
-        },
-        leafLength: {
-          value: cropStatus.leaf_length ?? 0,
-          target: currentData.growth.leafLength.target,
-          unit: 'cm',
-        },
-        leafWidth: {
-          value: cropStatus.leaf_width ?? 0,
-          target: currentData.growth.leafWidth.target,
-          unit: 'cm',
-        },
-      }
-    : currentData.growth;
+  const growthData = {
+    height: {
+      value: cropStatus?.plant_height ?? 0,
+      target: overview?.target_height ?? 90,
+      unit: 'cm',
+    },
+    leafCount: {
+      value: cropStatus?.leaf_count ?? 0,
+      target: 24,
+      unit: '개',
+    },
+    leafLength: {
+      value: cropStatus?.leaf_length ?? 0,
+      target: 13,
+      unit: 'cm',
+    },
+    leafWidth: {
+      value: cropStatus?.leaf_width ?? 0,
+      target: 8,
+      unit: 'cm',
+    },
+  };
 
   const growthDelta = serverDashboard?.growthDelta || {
     day: 0,
@@ -655,7 +507,7 @@ const DashboardPage = () => {
         desc: log.detail || '',
         status: log.status === 'issued' ? 'active' : 'done',
       }))
-    : currentData.logs;
+    : [];
 
   const dashboardAiLogs = aiReports.length
     ? aiReports.map((log) => ({
@@ -733,19 +585,15 @@ const DashboardPage = () => {
             </div>
             <div className="score-row">
               <div className="score-wrap">
-                <span className="score">
-                  {overview?.score ?? currentData.percent}
-                </span>
+                <span className="score">{maxGrowthScore}</span>
                 <span className="percent">%</span>
               </div>
-              <div className="phase-badge">
-                {overview?.phase ?? currentData.phase}
-              </div>
+              <div className="phase-badge">{currentPhase}</div>
             </div>
             <div className="progress-track">
               <div
                 className="progress-fill"
-                style={{ width: `${overview?.score ?? currentData.percent}%` }}
+                style={{ width: `${maxGrowthScore}%` }}
               />
             </div>
             <div className="status">
@@ -950,7 +798,7 @@ export default DashboardPage;
 const BaseCard = styled.div`
   background: #ffffff;
   border-radius: 20px;
-  padding: clamp(0.9rem, 1vw, 1.1rem);
+  padding: clamp(0.75rem, 0.9vw, 1rem);
   box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.02),
     0 10px 15px -3px rgba(0, 0, 0, 0.04);
@@ -961,24 +809,24 @@ const BaseCard = styled.div`
 `;
 
 const PageGrid = styled.div`
-  --grid-gap: clamp(0.8rem, 1vw, 1.1rem);
+  --grid-gap: clamp(0.7rem, 0.9vw, 1.1rem);
 
   width: 100%;
   min-width: 0;
-  height: calc(100dvh - 150px);
-  min-height: 760px;
+  height: calc(100vh - 120px);
+  min-height: 0;
+
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   gap: var(--grid-gap);
 
-  @media (max-width: 1600px) {
-    height: calc(100dvh - 130px);
-    min-height: 640px;
+  @media (max-width: 1400px) {
+    height: calc(100vh - 110px);
+    --grid-gap: 0.75rem;
   }
 
   @media (max-width: 1200px) {
     height: auto;
-    min-height: 0;
     display: flex;
     flex-direction: column;
   }
@@ -986,10 +834,20 @@ const PageGrid = styled.div`
 
 const TopRow = styled.div`
   display: grid;
-  grid-template-columns: minmax(360px, 0.9fr) minmax(520px, 1.6fr);
+  grid-template-columns: minmax(360px, 1.55fr) minmax(0, 1fr) minmax(
+      230px,
+      0.85fr
+    );
   gap: var(--grid-gap);
   width: 100%;
   min-height: 0;
+
+  @media (max-width: 1400px) {
+    grid-template-columns: minmax(330px, 1.4fr) minmax(0, 1fr) minmax(
+        220px,
+        0.8fr
+      );
+  }
 
   @media (max-width: 1200px) {
     grid-template-columns: 1fr;
@@ -997,6 +855,7 @@ const TopRow = styled.div`
 `;
 
 const TopLeftGroup = styled.div`
+  grid-column: 1 / 2;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--grid-gap);
@@ -1009,8 +868,8 @@ const TopLeftGroup = styled.div`
 
 const BottomRow = styled.div`
   display: grid;
-  grid-template-columns: minmax(420px, 1.55fr) minmax(280px, 1fr) minmax(
-      250px,
+  grid-template-columns: minmax(360px, 1.55fr) minmax(260px, 1fr) minmax(
+      230px,
       0.85fr
     );
   gap: var(--grid-gap);
@@ -1018,6 +877,13 @@ const BottomRow = styled.div`
   height: 100%;
   min-height: 0;
   overflow: hidden;
+
+  @media (max-width: 1400px) {
+    grid-template-columns: minmax(330px, 1.4fr) minmax(250px, 1fr) minmax(
+        220px,
+        0.8fr
+      );
+  }
 
   @media (max-width: 1200px) {
     grid-template-columns: 1fr;
@@ -1056,14 +922,16 @@ const RightColumn = styled.div`
 `;
 
 const WeatherMiniCard = styled(BaseCard)`
-  justify-content: space-between;
+  padding: 1em;
+  justify-content: flex-start;
   min-height: clamp(150px, 17vh, 190px);
 
   .header-row {
+    height: 28px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.9em;
+    margin-bottom: 0.8em;
   }
 
   .small-title {
@@ -1071,6 +939,8 @@ const WeatherMiniCard = styled(BaseCard)`
     font-weight: 800;
     color: #0f172a;
     letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin: 0;
   }
 
   .small-link {
@@ -1080,6 +950,7 @@ const WeatherMiniCard = styled(BaseCard)`
   }
 
   .weather-main {
+    flex: 1;
     display: flex;
     align-items: center;
     gap: 0.9em;
@@ -1118,8 +989,7 @@ const WeatherMiniCard = styled(BaseCard)`
     align-items: center;
     gap: 0.5em;
     flex-wrap: wrap;
-    margin-top: 0.1em;
-    margin-bottom: 1.2em;
+    margin-top: auto;
   }
 
   .badge {
@@ -1139,17 +1009,18 @@ const WeatherMiniCard = styled(BaseCard)`
 `;
 
 const ScoreMiniCard = styled(BaseCard)`
+  padding: 1em;
   min-height: clamp(150px, 17vh, 190px);
-  justify-content: center;
+  justify-content: flex-start;
   background: linear-gradient(180deg, #ecfdf5 0%, #dff7eb 100%);
   border: 1px solid rgba(16, 185, 129, 0.12);
-  padding: clamp(0.95rem, 1vw, 1.15rem);
 
   .score-top {
+    height: 28px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.9em;
+    margin-bottom: 0.8em;
   }
 
   .small-title {
@@ -1157,6 +1028,8 @@ const ScoreMiniCard = styled(BaseCard)`
     font-weight: 800;
     color: #0f172a;
     letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin: 0;
   }
 
   .score-badge {
@@ -1170,11 +1043,12 @@ const ScoreMiniCard = styled(BaseCard)`
   }
 
   .score-row {
+    flex: 1;
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: center;
     gap: 0.8em;
-    margin-bottom: 0.8em;
+    min-width: 0;
   }
 
   .score-wrap {
@@ -1182,6 +1056,7 @@ const ScoreMiniCard = styled(BaseCard)`
     align-items: baseline;
     gap: 4px;
     line-height: 1;
+    min-width: 0;
   }
 
   .score {
@@ -1202,14 +1077,19 @@ const ScoreMiniCard = styled(BaseCard)`
   .phase-badge {
     display: inline-flex;
     align-items: center;
-    width: fit-content;
+    justify-content: center;
+    max-width: 96px;
+    min-width: 42px;
+    overflow: hidden;
+    text-overflow: ellipsis;
     background: #10b981;
     color: #ffffff;
-    padding: 6px 11px;
+    padding: 6px 10px;
     border-radius: 999px;
     font-size: 0.74em;
     font-weight: 800;
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .progress-track {
@@ -1218,7 +1098,7 @@ const ScoreMiniCard = styled(BaseCard)`
     background: rgba(15, 23, 42, 0.08);
     border-radius: 999px;
     overflow: hidden;
-    margin-bottom: 0.85em;
+    margin: 0.85em 0;
   }
 
   .progress-fill {
@@ -1446,6 +1326,7 @@ const AILogGroupCard = styled(BaseCard)`
   }
 
   .chart-mini-title {
+    margin-top: 12.8px;
     font-size: 0.95em;
     font-weight: 800;
     color: #0f172a;
@@ -1463,6 +1344,17 @@ const SensorsGroupCard = styled(BaseCard)`
   height: 100%;
   min-height: 0;
   overflow: hidden;
+  padding: 1em;
+  box-sizing: border-box;
+
+  ${CardTitle} {
+    margin: 0 0 0.8em 0;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    line-height: 1.2;
+    flex-shrink: 0;
+  }
 
   @media (max-width: 1200px) {
     height: auto;
@@ -1477,9 +1369,13 @@ const SensorGrid = styled.div`
   gap: 0.55em;
   flex: 1;
   min-height: 0;
-  height: 100%;
+  height: 0;
+  overflow: hidden;
+  padding-right: 0.25em;
+  box-sizing: border-box;
 
   @media (max-width: 1200px) {
+    height: auto;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: none;
   }
@@ -1491,15 +1387,15 @@ const SensorGrid = styled.div`
 
 const SensorGridItem = styled.div`
   background-color: rgba(241, 245, 249, 0.6);
-  border-radius: 16px;
-  padding: 0.6em 0.9em;
+  border-radius: 14px;
+  padding: 0.45em 0.75em;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 2px;
+  gap: 1px;
   min-width: 0;
   min-height: 0;
-  transition: background 0.3s ease;
+  overflow: hidden;
 
   &:hover {
     background-color: #f8fafc;
@@ -1703,8 +1599,17 @@ const DeviceLogItem = styled.div`
 `;
 
 const GrowthCard = styled(BaseCard)`
+  grid-column: 2 / 4;
   min-height: clamp(150px, 17vh, 190px);
   padding: 1em;
+
+  ${CardTitle} {
+    margin: 0 0 0.8em 0;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    line-height: 1.2;
+  }
 `;
 
 const GrowthGrid = styled.div`
