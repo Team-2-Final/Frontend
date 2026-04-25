@@ -929,36 +929,47 @@ export default DashboardPage;
 const BaseCard = styled.div`
   background: #ffffff;
   border-radius: 20px;
-  padding: 1.1em;
+  padding: clamp(0.9rem, 1vw, 1.1rem);
   box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.02),
     0 10px 15px -3px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
 `;
 
 const PageGrid = styled.div`
-  --grid-gap: 1.1em;
-  --bottom-height: 690px;
+  --grid-gap: clamp(0.8rem, 1vw, 1.1rem);
 
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--grid-gap);
   width: 100%;
-  min-height: 0;
+  min-width: 0;
+  height: calc(100dvh - 150px);
+  min-height: 760px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--grid-gap);
+
+  @media (max-width: 1600px) {
+    height: calc(100dvh - 130px);
+    min-height: 640px;
+  }
+
+  @media (max-width: 1200px) {
+    height: auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
 `;
 
 const TopRow = styled.div`
   display: grid;
-  grid-template-columns:
-    calc((100% - (var(--grid-gap) * 2)) * (1.5 / 3.35))
-    calc(
-      100% - ((100% - (var(--grid-gap) * 2)) * (1.5 / 3.35)) - var(--grid-gap)
-    );
+  grid-template-columns: minmax(360px, 0.9fr) minmax(520px, 1.6fr);
   gap: var(--grid-gap);
   width: 100%;
+  min-height: 0;
+
   @media (max-width: 1200px) {
     grid-template-columns: 1fr;
   }
@@ -969,6 +980,7 @@ const TopLeftGroup = styled.div`
   grid-template-columns: 1fr 1fr;
   gap: var(--grid-gap);
   min-width: 0;
+
   @media (max-width: 640px) {
     grid-template-columns: 1fr;
   }
@@ -976,34 +988,35 @@ const TopLeftGroup = styled.div`
 
 const BottomRow = styled.div`
   display: grid;
-  grid-template-columns: 1.5fr 1fr 0.85fr;
+  grid-template-columns: minmax(420px, 1.55fr) minmax(280px, 1fr) minmax(
+      250px,
+      0.85fr
+    );
   gap: var(--grid-gap);
   width: 100%;
-  height: var(--bottom-height);
-  min-height: var(--bottom-height);
-  max-height: var(--bottom-height);
+  height: 100%;
+  min-height: 0;
   overflow: hidden;
 
   @media (max-width: 1200px) {
     grid-template-columns: 1fr;
     height: auto;
-    min-height: unset;
-    max-height: unset;
+    overflow: visible;
   }
 `;
+
 const CenterColumn = styled.div`
   display: flex;
   flex-direction: column;
   gap: var(--grid-gap);
   min-width: 0;
-  height: var(--bottom-height);
-  min-height: var(--bottom-height);
-  max-height: var(--bottom-height);
+  min-height: 0;
+  height: 100%;
   overflow: hidden;
+
   @media (max-width: 1200px) {
     height: auto;
-    min-height: unset;
-    max-height: unset;
+    overflow: visible;
   }
 `;
 
@@ -1011,20 +1024,19 @@ const RightColumn = styled.div`
   display: flex;
   flex-direction: column;
   min-width: 0;
-  height: var(--bottom-height);
-  min-height: var(--bottom-height);
-  max-height: var(--bottom-height);
+  min-height: 0;
+  height: 100%;
   overflow: hidden;
+
   @media (max-width: 1200px) {
     height: auto;
-    min-height: unset;
-    max-height: unset;
+    overflow: visible;
   }
 `;
 
 const WeatherMiniCard = styled(BaseCard)`
   justify-content: space-between;
-  min-height: 190px;
+  min-height: clamp(150px, 17vh, 190px);
 
   .header-row {
     display: flex;
@@ -1053,7 +1065,7 @@ const WeatherMiniCard = styled(BaseCard)`
   }
 
   .weather-icon {
-    font-size: 2em;
+    font-size: clamp(1.5rem, 2vw, 2rem);
   }
 
   .weather-info {
@@ -1062,7 +1074,7 @@ const WeatherMiniCard = styled(BaseCard)`
   }
 
   .temp {
-    font-size: 2em;
+    font-size: clamp(1.6rem, 2.2vw, 2rem);
     font-weight: 800;
     color: #0f172a;
     line-height: 1;
@@ -1106,11 +1118,11 @@ const WeatherMiniCard = styled(BaseCard)`
 `;
 
 const ScoreMiniCard = styled(BaseCard)`
-  min-height: 190px;
+  min-height: clamp(150px, 17vh, 190px);
   justify-content: center;
   background: linear-gradient(180deg, #ecfdf5 0%, #dff7eb 100%);
   border: 1px solid rgba(16, 185, 129, 0.12);
-  padding: 1.15em 1.1em;
+  padding: clamp(0.95rem, 1vw, 1.15rem);
 
   .score-top {
     display: flex;
@@ -1152,7 +1164,7 @@ const ScoreMiniCard = styled(BaseCard)`
   }
 
   .score {
-    font-size: 2.5rem;
+    font-size: clamp(2rem, 3vw, 2.5rem);
     font-weight: 900;
     color: #059669;
     letter-spacing: -0.05em;
@@ -1203,9 +1215,8 @@ const ScoreMiniCard = styled(BaseCard)`
 `;
 
 const CameraCard = styled(BaseCard)`
-  height: var(--bottom-height);
-  min-height: var(--bottom-height);
-  max-height: var(--bottom-height);
+  height: 100%;
+  min-height: 0;
   padding: 1em;
   overflow: hidden;
 
@@ -1233,7 +1244,6 @@ const CameraCard = styled(BaseCard)`
   .camera-view {
     position: relative;
     flex: 1;
-    height: calc(100% - 42px);
     min-height: 0;
     border-radius: 16px;
     overflow: hidden;
@@ -1289,7 +1299,8 @@ const CameraCard = styled(BaseCard)`
     }
   }
 
-  .live-text {
+  .live-text,
+  .updated-time {
     padding: 4px 8px;
     border-radius: 999px;
     background: rgba(15, 23, 42, 0.58);
@@ -1298,10 +1309,6 @@ const CameraCard = styled(BaseCard)`
 
   .updated-time {
     margin-left: auto;
-    padding: 4px 8px;
-    border-radius: 999px;
-    background: rgba(15, 23, 42, 0.58);
-    backdrop-filter: blur(8px);
   }
 
   .camera-overlay {
@@ -1378,17 +1385,13 @@ const CameraCard = styled(BaseCard)`
   }
 
   @media (max-width: 1200px) {
-    height: auto;
-    min-height: 520px;
-    max-height: none;
+    height: clamp(360px, 55vw, 560px);
   }
 `;
 
 const LogGroupCard = styled(BaseCard)`
-  flex: 0 0 400px;
-  height: 400px;
-  min-height: 400px;
-  max-height: 400px;
+  flex: 1.9 1 0;
+  min-height: 0;
   overflow: hidden;
 
   .log-header {
@@ -1404,48 +1407,15 @@ const LogGroupCard = styled(BaseCard)`
 
   @media (max-width: 1200px) {
     flex: none;
-    height: auto;
     min-height: 300px;
-    max-height: none;
   }
 `;
 
 const AILogGroupCard = styled(BaseCard)`
-  flex: 1;
-  height: calc(var(--bottom-height) - 400px - var(--grid-gap));
-  min-height: 0;
-  max-height: calc(var(--bottom-height) - 400px - var(--grid-gap));
+  flex: 1 1 0;
+  min-height: 170px;
   padding: 0.95em 1em;
   overflow: hidden;
-
-  .log-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.8em;
-
-    h2 {
-      margin-bottom: 0;
-    }
-  }
-
-  .sub-badge {
-    font-size: 0.68em;
-    font-weight: 800;
-    padding: 4px 10px;
-    border-radius: 20px;
-
-    &.ai {
-      background: rgba(16, 185, 129, 0.1);
-      color: #10b981;
-    }
-  }
-
-  @media (max-width: 1200px) {
-    height: auto;
-    min-height: 240px;
-    max-height: none;
-  }
 
   .chart-section {
     flex: 1;
@@ -1460,30 +1430,42 @@ const AILogGroupCard = styled(BaseCard)`
     color: #0f172a;
     margin-bottom: 8px;
   }
+
+  @media (max-width: 1200px) {
+    flex: none;
+    min-height: 220px;
+  }
 `;
 
 const SensorsGroupCard = styled(BaseCard)`
   flex: 1;
-  height: var(--bottom-height);
-  min-height: var(--bottom-height);
-  max-height: var(--bottom-height);
+  height: 100%;
+  min-height: 0;
   overflow: hidden;
 
   @media (max-width: 1200px) {
     height: auto;
     min-height: 400px;
-    max-height: none;
   }
 `;
 
 const SensorGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: repeat(6, 1fr);
+  grid-template-rows: repeat(6, minmax(0, 1fr));
   gap: 0.55em;
   flex: 1;
   min-height: 0;
   height: 100%;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: none;
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const SensorGridItem = styled.div`
@@ -1547,15 +1529,17 @@ const SensorGridItem = styled.div`
     justify-content: space-between;
     align-items: center;
     margin: 0;
+    gap: 8px;
 
     .left {
       display: flex;
       align-items: baseline;
       gap: 4px;
+      flex-shrink: 0;
     }
 
     .value {
-      font-size: 1.2em;
+      font-size: clamp(1rem, 1.2vw, 1.2em);
       font-weight: 800;
       color: #0f172a;
       line-height: 1;
@@ -1574,6 +1558,9 @@ const SensorGridItem = styled.div`
       font-weight: 700;
       color: #94a3b8;
       line-height: 1;
+      min-width: 0;
+      justify-content: flex-end;
+      flex-wrap: wrap;
     }
 
     .range {
@@ -1695,7 +1682,7 @@ const DeviceLogItem = styled.div`
 `;
 
 const GrowthCard = styled(BaseCard)`
-  min-height: 190px;
+  min-height: clamp(150px, 17vh, 190px);
   padding: 1em;
 `;
 
@@ -1703,6 +1690,11 @@ const GrowthGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 0.8em;
+  flex: 1;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
 
   .g-item {
     display: flex;
@@ -1711,11 +1703,13 @@ const GrowthGrid = styled.div`
     background: #f8fafc;
     padding: 10px 12px;
     border-radius: 12px;
+    min-width: 0;
 
     .g-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 8px;
     }
 
     .l {
@@ -1730,6 +1724,7 @@ const GrowthGrid = styled.div`
       font-weight: 800;
       padding: 3px 6px;
       border-radius: 4px;
+      white-space: nowrap;
 
       &.normal {
         background: #f0fdf4;
@@ -1864,8 +1859,8 @@ const GrowthBarsContainer = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* 핵심 */
-  gap: 24px;
+  justify-content: center;
+  gap: clamp(14px, 2vh, 24px);
   padding: 6px 0;
 
   .bar-row {
