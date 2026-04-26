@@ -140,6 +140,12 @@ export default function ControlPage() {
       }
 
       if (state.mode === 'emergency') {
+        setDevices((prev) =>
+          prev.map((device) => ({
+            ...device,
+            mode: 'auto',
+          })),
+        );
         setEmergency(true);
       }
     };
@@ -150,7 +156,6 @@ export default function ControlPage() {
       'globalControlStateChanged',
       applyGlobalControlState,
     );
-
     window.addEventListener('storage', applyGlobalControlState);
 
     return () => {
@@ -158,7 +163,6 @@ export default function ControlPage() {
         'globalControlStateChanged',
         applyGlobalControlState,
       );
-
       window.removeEventListener('storage', applyGlobalControlState);
     };
   }, []);
